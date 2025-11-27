@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'nombre',
+        'name',
         'apellido_paterno',
         'apellido_materno',
         'email',
@@ -102,7 +102,7 @@ class User extends Authenticatable
      */
     public function getNombreCompletoAttribute()
     {
-        return trim("{$this->nombre} {$this->apellido_paterno} {$this->apellido_materno}");
+        return trim("{$this->name} {$this->apellido_paterno} {$this->apellido_materno}");
     }
 
     /**
@@ -110,7 +110,7 @@ class User extends Authenticatable
      */
     public function getInicialesAttribute()
     {
-        $nombre = substr($this->nombre, 0, 1);
+        $nombre = substr($this->name, 0, 1);
         $apellido = substr($this->apellido_paterno, 0, 1);
         return strtoupper($nombre . $apellido);
     }

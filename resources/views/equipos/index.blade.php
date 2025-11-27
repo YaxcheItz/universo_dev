@@ -5,18 +5,40 @@
 @section('content')
 <div class="space-y-8">
 
-    <h1 class="text-3xl font-bold text-white">
-        ¡Bienvenido, {{ auth()->user()->nombre }}!
-    </h1>
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-universo-text mb-2">Equipos</h1>
+            <p class="text-universo-text-muted">Colabora con otros desarrolladores</p>
+        </div>
+        <a href="{{ route('equipos.create') }}" class="btn-primary flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-5 h-5"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            Crear Equipo
+        </a>
+    </div>
 
-    <p class="text-universo-text-muted">
-        Seccion equipos para prueba
-    </p>
+    <!-- Search Bar -->
+    <div class="mb-8">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-5 h-5 text-universo-text-muted"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </div>
+            <input type="text" placeholder="Buscar equipos..." class="input-field pl-10 w-full">
+        </div>
+    </div>
 
-    <div class="card">
-        <p class="text-white">
-            Aquí irá el resumen cuando estén listas las relaciones y migraciones.
-        </p>
+    <!-- Teams Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @forelse ($equipos as $equipo)
+            <x-team-card :equipo="$equipo" />
+        @empty
+            <p class="text-universo-text-muted md:col-span-2 lg:col-span-3">No hay equipos para mostrar.</p>
+        @endforelse
+    </div>
+
+    <!-- Pagination (Placeholder) -->
+    <div class="mt-8">
+        {{ $equipos->links() }}
     </div>
 
 </div>

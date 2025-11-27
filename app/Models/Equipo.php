@@ -11,7 +11,7 @@ class Equipo extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'nombre',
+        'name',
         'descripcion',
         'lider_id',
         'avatar',

@@ -11,7 +11,7 @@ class Proyecto extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'nombre',
+        'name',
         'descripcion',
         'empresa_id',
         'user_id',
