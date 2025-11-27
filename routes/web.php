@@ -31,9 +31,10 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
-    Route::view('/proyectos', 'proyectos.index');
-    Route::view('/torneos', 'torneos.index');
-    Route::view('/equipos', 'equipos.index');
-    Route::view('/perfil', 'perfil.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
+        Route::get('/torneos', [TorneoController::class, 'index'])->name('torneos.index');
+        Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
+        Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
 });
 
