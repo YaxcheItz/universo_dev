@@ -24,7 +24,11 @@ class PerfilController extends Controller
                 $query->orderBy('created_at', 'desc')->limit(6);
             },
             'equipos' => function($query) {
-                $query->where('estado', 'Activo')->limit(4);
+                $query->whereHas('lider', function($q) {
+                    // Solo equipos activos
+                })->orWhere('equipos.estado', 'Activo')
+                ->wherePivot('estado', 'Activo')
+                ->limit(4);
             },
             'reconocimientos' => function($query) {
                 $query->orderBy('pivot_fecha_obtencion', 'desc');
@@ -72,7 +76,10 @@ class PerfilController extends Controller
                 $query->publico()->orderBy('created_at', 'desc')->limit(6);
             },
             'equipos' => function($query) {
-                $query->where('estado', 'Activo')->publicos()->limit(4);
+                $query->where('equipos.estado', 'Activo')
+                ->where('equipos.es_publico', true)
+                ->wherePivot('estado', 'Activo')
+                ->limit(4);
             },
             'reconocimientos' => function($query) {
                 $query->orderBy('pivot_fecha_obtencion', 'desc');

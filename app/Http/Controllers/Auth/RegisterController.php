@@ -27,7 +27,7 @@ class RegisterController extends Controller
         // Validar datos del formulario
         $validated = $request->validate([
             // Información Personal (requeridos)
-            'nombre' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'apellido_paterno' => ['required', 'string', 'max:255'],
             'apellido_materno' => ['required', 'string', 'max:255'],
             
@@ -54,7 +54,7 @@ class RegisterController extends Controller
             'habilidades' => ['nullable', 'array'],
         ], [
             // Mensajes personalizados
-            'nombre.required' => 'El nombre es obligatorio',
+            'name.required' => 'El nombre es obligatorio',
             'apellido_paterno.required' => 'El apellido paterno es obligatorio',
             'apellido_materno.required' => 'El apellido materno es obligatorio',
             'email.required' => 'El correo electrónico es obligatorio',
@@ -70,7 +70,7 @@ class RegisterController extends Controller
         // Crear el usuario
         $user = User::create([
             // Información Personal
-            'nombre' => $validated['nombre'],
+            'name' => $validated['name'],
             'apellido_paterno' => $validated['apellido_paterno'],
             'apellido_materno' => $validated['apellido_materno'],
             
@@ -106,6 +106,6 @@ class RegisterController extends Controller
         Auth::login($user);
 
         // Redirigir al dashboard con mensaje de éxito
-        return redirect()->route('dashboard')->with('success', '¡Bienvenido a UniversoDev, ' . $user->nombre . '!');
+        return redirect()->route('dashboard')->with('success', '¡Bienvenido a UniversoDev, ' . $user->name . '!');
     }
 }
