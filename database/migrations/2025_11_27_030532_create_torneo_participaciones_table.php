@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('torneo_participaciones', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('torneo_id')->constrained('torneos')->cascadeOnDelete();
+            $table->foreignId('equipo_id')->constrained('equipos')->cascadeOnDelete();
+            $table->foreignId('proyecto_id')->nullable()->constrained('proyectos')->nullOnDelete();
+            $table->date('fecha_inscripcion');
+            $table->string('estado')->default('Inscrito');
+            $table->integer('puntaje_total')->default(0);
+            $table->integer('posicion')->nullable();
+            $table->string('premio_ganado')->nullable();
             $table->timestamps();
         });
     }

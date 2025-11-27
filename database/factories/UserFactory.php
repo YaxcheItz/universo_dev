@@ -23,11 +23,18 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $roles = ['Desarrollador', 'Team Leader', 'Product Manager', 'Designer', 'DevOps', 'QA Engineer', 'Data Scientist'];
+
         return [
-            'name' => fake()->name(),
+            'name' => fake()->firstName(),
+            'apellido_paterno' => fake()->lastName(),
+            'apellido_materno' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'telefono' => fake()->phoneNumber(),
+            'rol' => fake()->randomElement($roles),
+            'github_username' => fake()->unique()->userName(),
             'remember_token' => Str::random(10),
         ];
     }

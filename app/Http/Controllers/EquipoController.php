@@ -64,7 +64,7 @@ class EquipoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255|unique:equipos',
+            'name' => 'required|string|max:255|unique:equipos',
             'descripcion' => 'nullable|string',
             'max_miembros' => 'required|integer|min:2|max:50',
             'tecnologias' => 'nullable|array',
@@ -77,7 +77,7 @@ class EquipoController extends Controller
 
         // Crear el equipo
         $equipo = Equipo::create([
-            'nombre' => $validated['nombre'],
+            'name' => $validated['name'],
             'descripcion' => $validated['descripcion'] ?? null,
             'lider_id' => Auth::id(),
             'max_miembros' => $validated['max_miembros'],
@@ -170,7 +170,7 @@ class EquipoController extends Controller
         }
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255|unique:equipos,nombre,' . $equipo->id,
+            'name' => 'required|string|max:255|unique:equipos,name,' . $equipo->id,
             'descripcion' => 'nullable|string',
             'max_miembros' => 'required|integer|min:2|max:50',
             'tecnologias' => 'nullable|array',

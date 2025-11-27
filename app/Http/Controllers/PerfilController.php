@@ -121,7 +121,7 @@ class PerfilController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'apellido_paterno' => 'required|string|max:255',
             'apellido_materno' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],

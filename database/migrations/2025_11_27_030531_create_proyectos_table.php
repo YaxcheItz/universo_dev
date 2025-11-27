@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             
             // Información básica
-            $table->string('nombre');
+                        $table->string('name');
             $table->text('descripcion');
             
             // Relaciones

@@ -11,12 +11,10 @@
         <!-- Logo -->
         <div class="text-center">
             <div class="flex justify-center mb-4">
-                <svg class="w-16 h-16 text-universo-purple" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM9 9V5h2v4h4v2h-4v4H9v-4H5V9h4z"/>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-universo-purple"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
             </div>
-            <h2 class="text-3xl font-bold text-white">UniversoDev</h2>
-            <p class="mt-2 text-universo-text-muted">Plataforma de colaboración para desarrolladores</p>
+            <h2 class="text-3xl font-bold text-universo-text">UniversoDev</h2>
+            <p class="mt-2 text-universo-text-muted">Comunidad de programadores</p>
         </div>
 
         <!-- Login Form -->
@@ -28,16 +26,21 @@
                     <label for="email" class="block text-sm font-medium text-universo-text mb-2">
                         Correo Electrónico
                     </label>
-                    <input 
-                        id="email" 
-                        name="email" 
-                        type="email" 
-                        autocomplete="email" 
-                        required 
-                        class="input-field @error('email') border-red-500 @enderror"
-                        value="{{ old('email') }}"
-                        placeholder="tu@email.com"
-                    >
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-universo-text-muted"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>
+                        </div>
+                        <input 
+                            id="email" 
+                            name="email" 
+                            type="email" 
+                            autocomplete="email" 
+                            required 
+                            class="input-field pl-10 @error('email') border-red-500 @enderror"
+                            value="{{ old('email') }}"
+                            placeholder="tu@email.com"
+                        >
+                    </div>
                     @error('email')
                         <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                     @enderror
@@ -47,15 +50,20 @@
                     <label for="password" class="block text-sm font-medium text-universo-text mb-2">
                         Contraseña
                     </label>
-                    <input 
-                        id="password" 
-                        name="password" 
-                        type="password" 
-                        autocomplete="current-password" 
-                        required 
-                        class="input-field @error('password') border-red-500 @enderror"
-                        placeholder="••••••••"
-                    >
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-universo-text-muted"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <input 
+                            id="password" 
+                            name="password" 
+                            type="password" 
+                            autocomplete="current-password" 
+                            required 
+                            class="input-field pl-10 @error('password') border-red-500 @enderror"
+                            placeholder="••••••••"
+                        >
+                    </div>
                     @error('password')
                         <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                     @enderror
@@ -88,7 +96,7 @@
                 <div class="text-center text-sm text-universo-text-muted">
                     ¿No tienes cuenta? 
                     <a href="{{ route('register') }}" class="text-universo-purple hover:text-purple-400 transition font-medium">
-                        Regístrate aquí
+                        Regístrate
                     </a>
                 </div>
             </form>
