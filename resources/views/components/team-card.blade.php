@@ -7,8 +7,8 @@
             </div>
             <span class="text-universo-text-muted text-sm">{{ $equipo->miembros_actuales }} miembros</span>
         </div>
-        <p class="text-universo-text-muted text-sm mb-4">ID: {{ $equipo->id }}</p>
-        <p class="text-universo-text-muted mb-4 text-sm">{{ Str::limit($equipo->descripcion, 100) }}</p>
+        <p class="text-universo-text-muted text-sm mb-4">Líder: {{ $equipo->lider ? $equipo->lider->name : 'Sin líder' }}</p>
+        <p class="text-universo-text-muted mb-4 text-sm">{{ Str::limit($equipo->descripcion ?? 'Sin descripción', 100) }}</p>
     </div>
 
     <div>
@@ -17,14 +17,18 @@
             @forelse ($equipo->miembros as $miembro)
                 <li class="flex items-center gap-2 text-universo-text text-sm">
                     <div class="w-7 h-7 rounded-full bg-universo-purple/20 flex items-center justify-center text-universo-text text-xs font-bold">
-                        {{ substr($miembro->user->name, 0, 1) }}{{ substr($miembro->user->apellido_paterno, 0, 1) }}
+                        @if($miembro->name)
+                            {{ substr($miembro->name, 0, 1) }}{{ substr($miembro->apellido_paterno ?? '', 0, 1) }}
+                        @else
+                            ?
+                        @endif
                     </div>
-                    <span>{{ $miembro->user->name }} {{ $miembro->user->apellido_paterno }}</span>
-                    @if($miembro->rol_equipo == 'Líder de Equipo')
+                    <span>{{ $miembro->name ?? 'Sin nombre' }} {{ $miembro->apellido_paterno ?? '' }}</span>
+                    @if($miembro->pivot && $miembro->pivot->rol_equipo == 'Líder de Equipo')
                         <span class="badge badge-purple text-xs">Líder</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-4 h-4 text-universo-warning ml-auto"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    @else
-                        <span class="text-universo-text-muted text-xs">({{ $miembro->rol_equipo }})</span>
+                    @elseif($miembro->pivot)
+                        <span class="text-universo-text-muted text-xs">({{ $miembro->pivot->rol_equipo ?? 'Miembro' }})</span>
                     @endif
                 </li>
             @empty

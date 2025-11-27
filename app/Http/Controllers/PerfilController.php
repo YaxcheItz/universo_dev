@@ -66,6 +66,15 @@ class PerfilController extends Controller
     }
 
     /**
+     * Mostrar formulario de edición de perfil
+     */
+    public function edit()
+    {
+        $user = Auth::user();
+        return view('perfil.edit', compact('user'));
+    }
+
+    /**
      * Mostrar perfil de otro usuario
      */
     public function show(User $user)
