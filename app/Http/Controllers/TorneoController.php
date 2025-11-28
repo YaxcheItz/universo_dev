@@ -36,7 +36,7 @@ class TorneoController extends Controller
 
         // Búsqueda por nombre
         if ($request->filled('search')) {
-            $query->where('nombre', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
         $torneos = $query->paginate(12);
@@ -68,14 +68,14 @@ class TorneoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'categoria' => 'required|string',
             'dominio' => 'required|string',
-            'fecha_inicio' => 'required|date|after:today',
+            'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'fecha_registro_inicio' => 'required|date',
-            'fecha_registro_fin' => 'required|date|after:fecha_registro_inicio|before:fecha_inicio',
+            'fecha_registro_fin' => 'required|date|after:fecha_registro_inicio',
             'tamano_equipo_min' => 'required|integer|min:1',
             'tamano_equipo_max' => 'required|integer|gte:tamano_equipo_min',
             'max_participantes' => 'nullable|integer|min:1',
@@ -145,7 +145,7 @@ class TorneoController extends Controller
         }
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'categoria' => 'required|string',
             'dominio' => 'required|string',
