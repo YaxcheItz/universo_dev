@@ -129,61 +129,34 @@ class PerfilController extends Controller
         return view('perfil.show', compact('user', 'estadisticas', 'torneosParticipados', 'torneosCreados'));
     }
 
-    /**
-     * Actualizar perfil del usuario
-     */
-    public function update(Request $request)
-    {
-        $user = Auth::user();
+   /**
+ * Actualizar perfil del usuario
+ */
+public function update(Request $request)
+{
+    $user = Auth::user();
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string|max:255',
-            'ciudad' => 'nullable|string|max:255',
-            'estado' => 'nullable|string|max:255',
-            'codigo_postal' => 'nullable|string|max:10',
-            'pais' => 'nullable|string|max:255',
-            'rol' => 'required|string',
-            'biografia' => 'nullable|string|max:1000',
-            'github_username' => 'nullable|string|max:255',
-            'linkedin_url' => 'nullable|url|max:255',
-            'portfolio_url' => 'nullable|url|max:255',
-            'habilidades' => 'nullable|array',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'current_password' => 'nullable|required_with:new_password',
-            'new_password' => 'nullable|min:8|confirmed',
-        ]);
+    $validated = $request->validate([
+        'name'               => 'required|string|max:255',
+        'apellido_paterno'   => 'required|string|max:255',
+        'apellido_materno'   => 'required|string|max:255',
+        'nickname'           => ['nullable', 'string', 'max:50', Rule::unique('users', 'nickname')->ignore($user->id)],
+        'telefono'           => 'nullable|string|max:20',
+        'avatar'             => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'profile_bg_color'   => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+    ]);
 
-        // Actualizar avatar si se proporciona
-        if ($request->hasFile('avatar')) {
-            // Eliminar avatar anterior si existe
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $avatarPath;
+    // Actualizar avatar si se proporciona
+    if ($request->hasFile('avatar')) {
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
         }
-
-        // Actualizar contraseña si se proporciona
-        if ($request->filled('new_password')) {
-            // Verificar contraseña actual
-            if (!Hash::check($request->current_password, $user->password)) {
-                return back()->withErrors(['current_password' => 'La contraseña actual no es correcta']);
-            }
-
-            $validated['password'] = Hash::make($request->new_password);
-        }
-
-        // Remover campos que no se deben actualizar directamente
-        unset($validated['current_password'], $validated['new_password'], $validated['new_password_confirmation']);
-
-        $user->update($validated);
-
-        return back()->with('success', 'Perfil actualizado exitosamente');
+        $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        $validated['avatar'] = $avatarPath;
     }
+
+    $user->update($validated);
+
+    return back()->with('success', 'Perfil actualizado exitosamente');
+}
 }
