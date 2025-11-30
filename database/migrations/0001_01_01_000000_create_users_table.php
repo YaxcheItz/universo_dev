@@ -22,10 +22,10 @@ return new class extends Migration
             $table->string('estado')->nullable();
             $table->string('codigo_postal', 10)->nullable();
             $table->string('pais')->default('México');
-            $table->enum('rol', ['Desarrollador', 'Team Leader', 'Product Manager', 'Designer', 'DevOps', 'QA Engineer', 'Data Scientist'])->default('Desarrollador');
+            $table->string('rol')->nullable();
             $table->text('biografia')->nullable();
             $table->string('avatar')->nullable();
-            $table->string('github_username')->nullable();
+            $table->string('username')->nullable();
             $table->string('linkedin_url')->nullable();
             $table->string('portfolio_url')->nullable();
             $table->json('habilidades')->nullable();
