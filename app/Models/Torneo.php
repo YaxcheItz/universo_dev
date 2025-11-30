@@ -11,7 +11,7 @@ class Torneo extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'nombre',
+        'name',
         'descripcion',
         'user_id',
         'categoria',
