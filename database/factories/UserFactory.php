@@ -34,7 +34,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'telefono' => fake()->phoneNumber(),
             'rol' => fake()->randomElement($roles),
-            'github_username' => fake()->unique()->userName(),
+            'username' => fake()->unique()->userName(),
             'remember_token' => Str::random(10),
         ];
     }

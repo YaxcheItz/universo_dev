@@ -109,21 +109,13 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-universo-text mb-2">Rol *</label>
-                            <select name="rol" required class="input-field">
-                                <option value="">Selecciona un rol</option>
-                                <option value="Desarrollador Full-Stack">Desarrollador Full-Stack</option>
-                                <option value="Desarrollador Frontend">Desarrollador Frontend</option>
-                                <option value="Desarrollador Backend">Desarrollador Backend</option>
-                                <option value="Diseñador UI/UX">Diseñador UI/UX</option>
-                                <option value="DevOps Engineer">DevOps Engineer</option>
-                                <option value="Data Scientist">Data Scientist</option>
-                            </select>
-                            @error('rol')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                            <label class="block text-sm font-medium text-universo-text mb-2">Rol o Profesión *</label>
+                            <input name="rol" type="text" required class="input-field" value="{{ old('rol') }}">
+
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-universo-text mb-2">Usuario de GitHub</label>
-                            <input name="github_username" type="text" class="input-field" value="{{ old('github_username') }}">
+                            <label class="block text-sm font-medium text-universo-text mb-2">Nombre de Usuario</label>
+                            <input name="username" type="text" class="input-field" value="{{ old('username') }}">
                         </div>
                     </div>
                 </div>
