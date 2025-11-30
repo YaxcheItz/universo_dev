@@ -20,12 +20,10 @@ class EquipoController extends Controller
             ->publicos()
             ->orderBy('created_at', 'desc');
 
-        // Búsqueda por nombre
         if ($request->filled('search')) {
-            $query->where('nombre', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Filtro por equipos que aceptan miembros
         if ($request->filled('acepta_miembros') && $request->acepta_miembros == '1') {
             $query->aceptanMiembros();
         }
@@ -125,9 +123,8 @@ class EquipoController extends Controller
     {
         $equipo->load(['lider', 'miembros', 'proyectos', 'torneoParticipaciones.torneo']);
 
-        // Verificar si el usuario actual es miembro del equipo
-        $esMiembro = $equipo->miembros->contains(Auth::id());
-
+        // verificar si el usuario actual es miembro del equipo
+        $esMiembro = $equipo->miembros->contains('id', Auth::id());//para poder eliminar si es lider
         return view('equipos.show', compact('equipo', 'esMiembro'));
     }
 
@@ -136,7 +133,6 @@ class EquipoController extends Controller
      */
     public function edit(Equipo $equipo)
     {
-        // Verificar que el usuario sea el líder
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'No tienes permiso para editar este equipo');
         }
@@ -164,7 +160,6 @@ class EquipoController extends Controller
      */
     public function update(Request $request, Equipo $equipo)
     {
-        // Verificar que el usuario sea el líder
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'No tienes permiso para editar este equipo');
         }
@@ -193,7 +188,6 @@ class EquipoController extends Controller
      */
     public function destroy(Equipo $equipo)
     {
-        // Verificar que el usuario sea el líder
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'No tienes permiso para eliminar este equipo');
         }
@@ -209,18 +203,15 @@ class EquipoController extends Controller
      */
     public function unirse(Request $request, Equipo $equipo)
     {
-        // Verificar que el equipo acepta miembros
         if (!$equipo->acepta_miembros) {
             return back()->with('error', 'Este equipo no está aceptando nuevos miembros');
         }
 
-        // Verificar que hay espacio
         if ($equipo->miembros_actuales >= $equipo->max_miembros) {
             return back()->with('error', 'El equipo está lleno');
         }
 
-        // Verificar que no sea ya miembro
-        if ($equipo->miembros->contains(Auth::id())) {
+        if ($equipo->miembros->contains('id', Auth::id())) {
             return back()->with('error', 'Ya eres miembro de este equipo');
         }
 
@@ -228,7 +219,6 @@ class EquipoController extends Controller
             'rol_equipo' => 'required|string',
         ]);
 
-        // Agregar como miembro
         EquipoMiembro::create([
             'equipo_id' => $equipo->id,
             'user_id' => Auth::id(),
@@ -243,41 +233,10 @@ class EquipoController extends Controller
     }
 
     /**
-     * Salir de un equipo
-     */
-    public function salir(Equipo $equipo)
-    {
-        // Verificar que es miembro
-        $miembro = EquipoMiembro::where('equipo_id', $equipo->id)
-            ->where('user_id', Auth::id())
-            ->first();
-
-        if (!$miembro) {
-            return back()->with('error', 'No eres miembro de este equipo');
-        }
-
-        // No permitir que el líder salga
-        if ($equipo->lider_id === Auth::id()) {
-            return back()->with('error', 'El líder no puede salir del equipo. Transfiere el liderazgo primero.');
-        }
-
-        $miembro->update([
-            'estado' => 'Retirado',
-            'fecha_salida' => now(),
-        ]);
-
-        $equipo->decrement('miembros_actuales');
-
-        return redirect()->route('equipos.index')
-            ->with('success', 'Has salido del equipo');
-    }
-
-    /**
-     * Agregar miembro al equipo (solo líder)
+     * Agregar miembro (solo líder)
      */
     public function agregarMiembro(Request $request, Equipo $equipo)
     {
-        // Verificar que el usuario sea el líder
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'Solo el líder puede agregar miembros');
         }
@@ -287,13 +246,11 @@ class EquipoController extends Controller
             'rol_equipo' => 'required|string',
         ]);
 
-        // Verificar que hay espacio
         if ($equipo->miembros_actuales >= $equipo->max_miembros) {
             return back()->with('error', 'El equipo está lleno');
         }
 
-        // Verificar que no sea ya miembro
-        if ($equipo->miembros->contains($request->user_id)) {
+        if ($equipo->miembros->contains('id', $request->user_id)) {
             return back()->with('error', 'Este usuario ya es miembro del equipo');
         }
 
@@ -311,16 +268,14 @@ class EquipoController extends Controller
     }
 
     /**
-     * Remover miembro del equipo (solo líder)
+     * Remover miembro (solo líder)
      */
     public function removerMiembro(Equipo $equipo, User $user)
     {
-        // Verificar que el usuario sea el líder
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'Solo el líder puede remover miembros');
         }
 
-        // No permitir remover al líder
         if ($user->id === $equipo->lider_id) {
             return back()->with('error', 'No puedes removerte a ti mismo como líder');
         }
