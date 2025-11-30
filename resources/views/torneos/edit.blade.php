@@ -197,7 +197,8 @@
                 </div>
 
                 <div class="flex items-center">
-                    <input type="checkbox" name="es_publico" id="es_publico" class="mr-2" {{ old('es_publico', $torneo->es_publico) ? 'checked' : '' }}>
+                    <input type="hidden" name="es_publico" value="0">
+                    <input type="checkbox" name="es_publico" id="es_publico" value="1" class="mr-2" {{ old('es_publico', $torneo->es_publico) ? 'checked' : '' }}>
                     <label for="es_publico" class="text-sm text-universo-text">Torneo público (visible para todos)</label>
                 </div>
             </div>
