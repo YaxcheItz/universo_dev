@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Agregar columnas sin unique constraint primero
+            // Agregar columnas
             if (!Schema::hasColumn('users', 'nickname')) {
-                $table->string('nickname')->nullable();
+                $table->string('nickname')->nullable()->unique();
             }
             if (!Schema::hasColumn('users', 'profile_photo_path')) {
                 $table->string('profile_photo_path')->nullable();
@@ -23,9 +23,6 @@ return new class extends Migration
                 $table->string('profile_bg_color')->default('#1a1a2e');
             }
         });
-
-        // Agregar índice único para nickname (SQLite lo acepta así)
-        \DB::statement('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_nickname ON users(nickname) WHERE nickname IS NOT NULL');
     }
 
     /**
@@ -35,6 +32,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (Schema::hasColumn('users', 'nickname')) {
+                $table->dropUnique(['nickname']); // Elimina el índice primero
                 $table->dropColumn('nickname');
             }
             if (Schema::hasColumn('users', 'profile_photo_path')) {
@@ -44,8 +42,5 @@ return new class extends Migration
                 $table->dropColumn('profile_bg_color');
             }
         });
-
-        // Eliminar índice único
-        \DB::statement('DROP INDEX IF EXISTS idx_users_nickname');
     }
 };
