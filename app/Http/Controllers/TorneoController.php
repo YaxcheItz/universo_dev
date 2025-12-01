@@ -201,20 +201,39 @@ class TorneoController extends Controller
 
         $equipo = Equipo::findOrFail($request->equipo_id);
 
-        // Verificar que el usuario sea el líder del equipo
+        // VALIDACIÓN 1: Verificar que el usuario sea el líder del equipo
         if ($equipo->lider_id !== Auth::id()) {
             return back()->with('error', 'Solo el líder del equipo puede inscribirlo');
         }
 
-        // Verificar que el equipo no esté ya inscrito
+        // VALIDACIÓN 2: Verificar que el estado sea "Inscripciones Abiertas"
+        if ($torneo->estado !== 'Inscripciones Abiertas') {
+            return back()->with('error', 'Las inscripciones no están abiertas para este torneo. Estado actual: ' . $torneo->estado);
+        }
+
+        // VALIDACIÓN 3: Verificar que esté dentro del período de inscripciones
+        $hoy = now();
+        if ($hoy < $torneo->fecha_registro_inicio) {
+            return back()->with('error', 'Las inscripciones aún no han iniciado. Inician el ' . $torneo->fecha_registro_inicio->format('d/m/Y'));
+        }
+        if ($hoy > $torneo->fecha_registro_fin) {
+            return back()->with('error', 'El período de inscripciones ha finalizado');
+        }
+
+        // VALIDACIÓN 4: Verificar que el torneo no esté lleno
+        if ($torneo->max_participantes && $torneo->participantes_actuales >= $torneo->max_participantes) {
+            return back()->with('error', 'El torneo ha alcanzado el máximo de participantes (' . $torneo->max_participantes . ' equipos)');
+        }
+
+        // VALIDACIÓN 5: Verificar que el equipo no esté ya inscrito
         if ($torneo->participaciones()->where('equipo_id', $equipo->id)->exists()) {
             return back()->with('error', 'El equipo ya está inscrito en este torneo');
         }
 
-        // Verificar tamaño del equipo
+        // VALIDACIÓN 6: Verificar tamaño del equipo
         $cantidadMiembros = $equipo->miembros()->count();
         if ($cantidadMiembros < $torneo->tamano_equipo_min || $cantidadMiembros > $torneo->tamano_equipo_max) {
-            return back()->with('error', "El equipo debe tener entre {$torneo->tamano_equipo_min} y {$torneo->tamano_equipo_max} miembros");
+            return back()->with('error', "El equipo debe tener entre {$torneo->tamano_equipo_min} y {$torneo->tamano_equipo_max} miembros. Tu equipo tiene {$cantidadMiembros} miembros");
         }
 
         // Crear participación
