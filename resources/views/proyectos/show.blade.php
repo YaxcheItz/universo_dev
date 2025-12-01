@@ -60,23 +60,57 @@
         <!-- Descripción -->
         <p class="text-universo-text mb-6 leading-relaxed">{{ $proyecto->descripcion }}</p>
 
-        <!-- Estadísticas -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-universo-bg rounded-lg">
-            <div class="text-center">
-                <div class="text-2xl font-bold text-universo-purple mb-1">{{ $proyecto->estrellas }}</div>
-                <div class="text-sm text-universo-text-muted">Estrellas</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-universo-purple mb-1">{{ $proyecto->forks }}</div>
-                <div class="text-sm text-universo-text-muted">Forks</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-universo-purple mb-1">{{ $proyecto->contribuidores }}</div>
-                <div class="text-sm text-universo-text-muted">Contribuidores</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-universo-purple mb-1">{{ $proyecto->commits }}</div>
-                <div class="text-sm text-universo-text-muted">Commits</div>
+        <!-- Valoración -->
+        <div class="p-4 bg-universo-bg rounded-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    @php
+                        $promedio = round($proyecto->promedio_valoracion * 2) / 2;
+                        $estrellas_llenas = floor($promedio);
+                        $media_estrella = ($promedio - $estrellas_llenas) >= 0.5;
+                        $estrellas_vacias = 5 - $estrellas_llenas - ($media_estrella ? 1 : 0);
+                    @endphp
+                    
+                    <div class="flex items-center gap-1">
+                        @for($i = 0; $i < $estrellas_llenas; $i++)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" class="text-yellow-400">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        @endfor
+                        @if($media_estrella)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-yellow-400">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        @endif
+                        @for($i = 0; $i < $estrellas_vacias; $i++)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-universo-text-muted">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        @endfor
+                    </div>
+                    
+                    <span class="text-2xl font-bold text-universo-text">
+                        {{ number_format($proyecto->promedio_valoracion, 1) }}
+                    </span>
+                    <span class="text-universo-text-muted">
+                        ({{ $proyecto->total_valoraciones }} {{ $proyecto->total_valoraciones === 1 ? 'valoración' : 'valoraciones' }})
+                    </span>
+                </div>
+
+                @auth
+                    @if(Auth::id() !== $proyecto->user_id)
+                        <button 
+                            onclick="abrirModalValoracion({{ $proyecto->id }}, '{{ $proyecto->name }}', {{ $proyecto->valoracionDeUsuario(Auth::id())?->puntuacion ?? 0 }})"
+                            class="btn-primary text-sm"
+                        >
+                            @if($proyecto->yaValoradoPor(Auth::id()))
+                                Editar mi valoración
+                            @else
+                                Valorar proyecto
+                            @endif
+                        </button>
+                    @endif
+                @endauth
             </div>
         </div>
     </div>
@@ -184,29 +218,101 @@
                     @endif
                 </div>
             </div>
-
-            <!-- Relaciones -->
-            @if($proyecto->empresa || $proyecto->equipo)
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-universo-text mb-4">Relaciones</h3>
-                    <div class="space-y-3 text-sm">
-                        @if($proyecto->empresa)
-                            <div>
-                                <span class="text-universo-text-muted">Empresa</span>
-                                <p class="text-universo-text font-medium">{{ $proyecto->empresa->nombre }}</p>
-                            </div>
-                        @endif
-                        
-                        @if($proyecto->equipo)
-                            <div>
-                                <span class="text-universo-text-muted">Equipo</span>
-                                <p class="text-universo-text font-medium">{{ $proyecto->equipo->nombre }}</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </div>
+
+<!-- Modal de Valoración -->
+<div id="modal-valoracion" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="cerrarModalValoracion()">
+    <div class="bg-universo-card-bg border border-universo-border rounded-lg p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <h3 class="text-xl font-bold text-universo-text mb-4">Valorar Proyecto</h3>
+        <p class="text-universo-text-muted mb-4" id="modal-proyecto-nombre"></p>
+        
+        <form id="form-valoracion" method="POST" action="">
+            @csrf
+            <input type="hidden" name="proyecto_id" id="valoracion-proyecto-id">
+            
+            <!-- Estrellas para valorar -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-universo-text mb-2">Puntuación</label>
+                <div class="flex gap-2" id="estrellas-valoracion">
+                    @for($i = 1; $i <= 5; $i++)
+                        <button type="button" onclick="seleccionarEstrella({{ $i }})" class="estrella-btn" data-valor="{{ $i }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-text-muted hover:text-yellow-400 transition-colors">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                    @endfor
+                </div>
+                <input type="hidden" name="puntuacion" id="puntuacion-input" required>
+            </div>
+            
+            <!-- Comentario opcional -->
+            <div class="mb-4">
+                <label for="comentario" class="block text-sm font-medium text-universo-text mb-2">Comentario (opcional)</label>
+                <textarea name="comentario" id="comentario" rows="3" class="input-field" placeholder="Comparte tu opinión sobre este proyecto..."></textarea>
+            </div>
+            
+            <div class="flex gap-3 justify-end">
+                <button type="button" onclick="cerrarModalValoracion()" class="btn-secondary">Cancelar</button>
+                <button type="submit" class="btn-primary">Enviar Valoración</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let puntuacionSeleccionada = 0;
+
+function abrirModalValoracion(proyectoId, proyectoNombre, valoracionActual = 0) {
+    document.getElementById('modal-valoracion').classList.remove('hidden');
+    document.getElementById('modal-valoracion').classList.add('flex');
+    document.getElementById('modal-proyecto-nombre').textContent = proyectoNombre;
+    document.getElementById('valoracion-proyecto-id').value = proyectoId;
+    document.getElementById('form-valoracion').action = `/proyectos/${proyectoId}/valorar`;
+    
+    if (valoracionActual > 0) {
+        seleccionarEstrella(valoracionActual);
+    } else {
+        puntuacionSeleccionada = 0;
+        actualizarEstrellas();
+    }
+}
+
+function cerrarModalValoracion() {
+    document.getElementById('modal-valoracion').classList.add('hidden');
+    document.getElementById('modal-valoracion').classList.remove('flex');
+    puntuacionSeleccionada = 0;
+    document.getElementById('comentario').value = '';
+    actualizarEstrellas();
+}
+
+function seleccionarEstrella(valor) {
+    puntuacionSeleccionada = valor;
+    document.getElementById('puntuacion-input').value = valor;
+    actualizarEstrellas();
+}
+
+function actualizarEstrellas() {
+    const botones = document.querySelectorAll('.estrella-btn');
+    botones.forEach((boton, index) => {
+        const svg = boton.querySelector('svg');
+        if (index < puntuacionSeleccionada) {
+            svg.setAttribute('fill', 'currentColor');
+            svg.classList.remove('text-universo-text-muted');
+            svg.classList.add('text-yellow-400');
+        } else {
+            svg.setAttribute('fill', 'none');
+            svg.classList.add('text-universo-text-muted');
+            svg.classList.remove('text-yellow-400');
+        }
+    });
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModalValoracion();
+    }
+});
+</script>
 @endsection
