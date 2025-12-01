@@ -4,6 +4,21 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
+    <!-- Mensajes de éxito y error -->
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-green-500/10 border border-green-500 rounded-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 flex-shrink-0"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <p class="text-green-500 font-medium">{{ session('success') }}</p>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>
+            <p class="text-red-500 font-medium">{{ session('error') }}</p>
+        </div>
+    @endif
+
     <!-- Header con Banner -->
     <div class="card mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -158,8 +173,27 @@
             <div class="card">
                 <h2 class="text-xl font-semibold text-universo-text mb-4">Inscripción</h2>
                 
-                @if($torneo->estado === 'Inscripciones Abiertas')
-                    @if($equiposDisponibles->count() > 0)
+                @php
+                    $yaInscrito = $torneo->participaciones()
+                        ->whereHas('equipo', function($q) {
+                            $q->where('lider_id', auth()->id());
+                        })->exists();
+                @endphp
+
+                @if($yaInscrito)
+                    <div class="p-4 bg-green-500/10 border border-green-500 rounded-lg text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <p class="text-green-500 font-semibold mb-1">¡Ya estás inscrito!</p>
+                        <p class="text-sm text-universo-text-muted">Tienes un equipo participando en este torneo</p>
+                    </div>
+                @elseif($torneo->estado === 'Inscripciones Abiertas')
+                    @if($torneo->max_participantes && $torneo->participantes_actuales >= $torneo->max_participantes)
+                        <div class="text-center py-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-400"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>
+                            <p class="text-red-400 font-semibold mb-1">Torneo Lleno</p>
+                            <p class="text-universo-text-muted">Este torneo ha alcanzado el máximo de {{ $torneo->max_participantes }} equipos</p>
+                        </div>
+                    @elseif($equiposDisponibles->count() > 0)
                         <form action="{{ route('torneos.inscribir', $torneo) }}" method="POST" class="space-y-4">
                             @csrf
                             <div>
@@ -252,20 +286,13 @@
 function copiarEnlace() {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-        alert('¡Enlace copiado al portapapeles!');
+        // Crear notificación visual en lugar de alert
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        notification.textContent = '¡Enlace copiado al portapapeles!';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
     });
 }
 </script>
-
-@if(session('success'))
-<script>
-    alert('{{ session('success') }}');
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    alert('{{ session('error') }}');
-</script>
-@endif
 @endsection
