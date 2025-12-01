@@ -16,7 +16,7 @@ class TorneoFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-    {
+    {   //modificar para obtener de vase de datos
         $categorias = ['Frontend', 'Backend', 'Full-Stack', 'Mobile', 'DevOps', 'Data Science', 'Machine Learning', 'Game Development', 'Blockchain', 'IoT', 'Ciberseguridad'];
         $dominios = ['Web', 'Mobile', 'Desktop', 'Cloud', 'Embedded', 'AI/ML', 'Blockchain'];
         $niveles = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];

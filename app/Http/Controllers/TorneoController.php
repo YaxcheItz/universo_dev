@@ -90,7 +90,7 @@ class TorneoController extends Controller
 
         $validated['user_id'] = Auth::id();
         $validated['participantes_actuales'] = 0;
-        $validated['es_publico'] = $request->has('es_publico');
+        $validated['es_publico'] = $request->input('es_publico', 0) == 1;
 
         $torneo = Torneo::create($validated);
 
@@ -165,7 +165,7 @@ class TorneoController extends Controller
             'es_publico' => 'boolean',
         ]);
 
-        $validated['es_publico'] = $request->has('es_publico');
+        $validated['es_publico'] = $request->input('es_publico', 0) == 1;
 
         $torneo->update($validated);
 
