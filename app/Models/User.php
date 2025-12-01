@@ -26,7 +26,7 @@ class User extends Authenticatable
         'rol',
         'biografia',
         'avatar',
-        'username',
+        'github_username',
         'linkedin_url',
         'portfolio_url',
         'habilidades',
