@@ -12,32 +12,28 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-    'name',
-    'apellido_paterno',
-    'apellido_materno',
-    'email',
-    'password',
-    'telefono',
-    'direccion',
-    'ciudad',
-    'estado',
-    'codigo_postal',
-    'pais',
-    'rol',
-    'biografia',
-    'avatar',
-    'github_username',
-    'linkedin_url',
-    'portfolio_url',
-    'habilidades',
-    'puntos_total',
-    'proyectos_completados',
-    'torneos_ganados',
-    'nickname',                  // ← agregado
-    'profile_photo_path',        // ← agregado
-    'profile_bg_color',          // ← agregado
-];
-
+        'name',
+        'apellido_paterno',
+        'apellido_materno',
+        'email',
+        'password',
+        'telefono',
+        'direccion',
+        'ciudad',
+        'estado',
+        'codigo_postal',
+        'pais',
+        'rol',
+        'biografia',
+        'avatar',
+        'github_username',
+        'linkedin_url',
+        'portfolio_url',
+        'habilidades',
+        'puntos_total',
+        'proyectos_completados',
+        'torneos_ganados',
+    ];
 
     protected $hidden = [
         'password',

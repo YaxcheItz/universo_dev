@@ -44,8 +44,8 @@ class RegisterController extends Controller
             'pais' => ['nullable', 'string', 'max:255'],
             
             // Información Profesional (requeridos)
-            'rol' => ['required', 'string', 'in:Desarrollador,Team Leader,Product Manager,Designer,DevOps,QA Engineer,Data Scientist'],
-            'github_username' => ['nullable', 'string', 'max:255'],
+            'rol' => ['required', 'string', 'max:255'],
+            'username' => ['nullable', 'string', 'max:255'],
             'linkedin_url' => ['nullable', 'url', 'max:255'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             
@@ -63,8 +63,6 @@ class RegisterController extends Controller
             'password.required' => 'La contraseña es obligatoria',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
             'password.confirmed' => 'Las contraseñas no coinciden',
-            'rol.required' => 'Debes seleccionar un rol',
-            'rol.in' => 'El rol seleccionado no es válido',
         ]);
 
         // Crear el usuario
@@ -88,7 +86,7 @@ class RegisterController extends Controller
             
             // Información Profesional
             'rol' => $validated['rol'],
-            'github_username' => $validated['github_username'] ?? null,
+            'username' => $validated['username'] ?? null,
             'linkedin_url' => $validated['linkedin_url'] ?? null,
             'portfolio_url' => $validated['portfolio_url'] ?? null,
             
