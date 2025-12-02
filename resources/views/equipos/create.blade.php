@@ -77,62 +77,81 @@
 </div>
 
 
+
 <script>
     const yoLiderCheckbox = document.getElementById('yo_lider');
     const miembrosContainer = document.getElementById('miembros-container');
     const agregarBtn = document.getElementById('agregar-miembro');
 
     const roles = @json($rolesDisponibles ?? []);
-    const users = @json(\App\Models\User::select('id','name')->get());
+    let users = @json(\App\Models\User::select('id','name')->get());
+    const loggedUserId = {{ auth()->id() }};
+
+    users = users.filter(u => u.id !== loggedUserId);
+
+    function agregarYoLider() {
+        let div = document.getElementById('miembro-yo');
+
+        if (yoLiderCheckbox.checked) {
+            if (!div) {
+                div = document.createElement('div');
+                div.classList.add('flex', 'gap-2', 'items-center');
+                div.id = 'miembro-yo';
+
+                div.innerHTML = `
+                    <input type="hidden" name="miembros[yo][user_id]" value="${loggedUserId}">
+                    <select name="miembros[yo][rol_equipo]" class="input-field rol-select">
+                        ${roles.map(r => {
+                            // Seleccionar automáticamente Líder de Equipo
+                            const selected = r.toLowerCase() === 'líder de equipo' ? 'selected' : '';
+                            return `<option value="${r}" ${selected}>${r}</option>`;
+                        }).join('')}
+                    </select>
+                    <span class="text-sm text-gray-500">Tú</span>
+                `;
+                miembrosContainer.prepend(div);
+            }
+        } else if (div) {
+            div.remove();
+        }
+
+        actualizarOpcionesLider();
+    }
 
     function actualizarOpcionesLider() {
         const selectsRol = document.querySelectorAll('select[name*="[rol_equipo]"]');
-
-        // Si yo soy el lider bloquear para los demas
-        if (yoLiderCheckbox.checked) {
-            selectsRol.forEach(select => {
-                [...select.options].forEach(option => {
-                    if (option.value === "Líder de Equipo") {
-                        option.disabled = true;
-
-                        // Si un select ya lo tine se limpia
-                        if (select.value === "Líder de Equipo") {
-                            select.value = "";
-                        }
-                    }
-                });
-            });
-            return;
-        }
-
-        let liderSeleccionado = false;
-
-        selectsRol.forEach(select => {
-            if (select.value === "Líder de Equipo") {
-                liderSeleccionado = true;
-            }
-        });
-
         selectsRol.forEach(select => {
             [...select.options].forEach(option => {
-                if (option.value === "Líder de Equipo") {
-                    option.disabled = liderSeleccionado && select.value !== "Líder de Equipo";
+                if (option.text.toLowerCase().includes('líder')) {
+                    // Si el checkbox está marcado, deshabilitar otros selects
+                    option.disabled = yoLiderCheckbox.checked && select.id !== 'miembro-yo';
                 }
             });
         });
     }
 
-    // Para gregar mienbros
+    function actualizarOpcionesUsuarios() {
+        const selects = miembrosContainer.querySelectorAll('select[name*="[user_id]"]');
+        const seleccionados = Array.from(selects).map(s => s.value).filter(v => v);
+        return users.filter(u => !seleccionados.includes(u.id.toString()));
+    }
+
     agregarBtn.addEventListener('click', () => {
         const index = miembrosContainer.children.length;
 
         const div = document.createElement('div');
-        div.classList.add('flex', 'gap-4', 'items-center');
+        div.classList.add('flex', 'gap-2', 'items-center');
+
+        const disponibles = actualizarOpcionesUsuarios();
+        if(disponibles.length === 0){
+            alert('No hay más usuarios disponibles para agregar.');
+            return;
+        }
 
         div.innerHTML = `
             <select name="miembros[${index}][user_id]" class="input-field">
                 <option value="">Seleccionar usuario</option>
-                ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+                ${disponibles.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
             </select>
 
             <select name="miembros[${index}][rol_equipo]" class="input-field rol-select">
@@ -145,24 +164,16 @@
 
         miembrosContainer.appendChild(div);
 
-        // botones de eliminar
-        div.querySelector('.remove-btn').addEventListener('click', () => {
-            div.remove();
-            actualizarOpcionesLider();
-        });
+        div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
 
-        // detectar cambios de rol
-        div.querySelector('.rol-select').addEventListener('change', actualizarOpcionesLider);
-
-        // actualizar al agregar
         actualizarOpcionesLider();
     });
 
-    // detectar cambios en checkbox yo_lider
-    yoLiderCheckbox.addEventListener('change', actualizarOpcionesLider);
+    yoLiderCheckbox.addEventListener('change', agregarYoLider);
 
+    // Inicializar
+    agregarYoLider();
 </script>
-
 
 
 
