@@ -94,7 +94,7 @@
                 <label class="label ">Miembros del Equipo</label>
                 <table class="pt-30 w-full text-center">
                     <thead>
-                        <tr class="bg-gray-100 h-16">
+                        <tr class="input-field h-16">
                             <th  >Nombre</th>
                             <th >Rol</th>
                             <th>Acción</th>
@@ -108,7 +108,7 @@
                                     @if($miembro->id === $equipo->lider_id)
                                         {{-- El líder tiene su rol fijo --}}
                                         <input type="hidden" name="miembros[{{ $miembro->id }}][rol_equipo]" value="{{ $miembro->pivot->rol_equipo }}">
-                                        <span class="input-field">
+                                        <span >
                                             {{ $miembro->pivot->rol_equipo }} (Líder)
                                         </span>
                                     @else
