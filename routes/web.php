@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/torneos/{torneo}', [TorneoController::class, 'update'])->name('torneos.update');
     Route::delete('/torneos/{torneo}', [TorneoController::class, 'destroy'])->name('torneos.destroy');
     Route::post('/torneos/{torneo}/inscribir', [TorneoController::class, 'inscribir'])->name('torneos.inscribir');
+    Route::post('/torneos/{torneo}/salir', [TorneoController::class, 'salir'])->name('torneos.salir');
     Route::get('/torneos/{torneo}/participantes', [TorneoController::class, 'participantes'])->name('torneos.participantes');
     
     // Equipos
