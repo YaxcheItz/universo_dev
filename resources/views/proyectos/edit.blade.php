@@ -152,37 +152,6 @@
             </div>
         </div>
 
-        <!-- Estadísticas -->
-        <div class="card">
-            <h2 class="text-xl font-semibold text-universo-text mb-4">Estadísticas del Repositorio</h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                    <label for="estrellas" class="block text-sm font-medium text-universo-text mb-2">⭐ Estrellas</label>
-                    <input type="number" name="estrellas" id="estrellas" min="0" class="input-field" value="{{ old('estrellas', $proyecto->estrellas) }}">
-                    @error('estrellas')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
-                </div>
-
-                <div>
-                    <label for="forks" class="block text-sm font-medium text-universo-text mb-2">🔱 Forks</label>
-                    <input type="number" name="forks" id="forks" min="0" class="input-field" value="{{ old('forks', $proyecto->forks) }}">
-                    @error('forks')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
-                </div>
-
-                <div>
-                    <label for="contribuidores" class="block text-sm font-medium text-universo-text mb-2">👥 Contribuidores</label>
-                    <input type="number" name="contribuidores" id="contribuidores" min="1" class="input-field" value="{{ old('contribuidores', $proyecto->contribuidores) }}">
-                    @error('contribuidores')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
-                </div>
-
-                <div>
-                    <label for="commits" class="block text-sm font-medium text-universo-text mb-2">📝 Commits</label>
-                    <input type="number" name="commits" id="commits" min="0" class="input-field" value="{{ old('commits', $proyecto->commits) }}">
-                    @error('commits')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
-                </div>
-            </div>
-        </div>
-
         <!-- Configuración -->
         <div class="card">
             <h2 class="text-xl font-semibold text-universo-text mb-4">Configuración</h2>
