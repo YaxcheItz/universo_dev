@@ -321,11 +321,12 @@ class EquipoController extends Controller
             abort(403, 'No tienes permiso para eliminar este equipo');
         }
 
-        $equipo->delete();
-
+        $equipo->forceDelete(); 
+        
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo eliminado exitosamente');
     }
+
 
     /**
      * Unirse a un equipo
