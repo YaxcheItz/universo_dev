@@ -91,11 +91,11 @@
             </div>
 
             <div>
-                <label class="label">Miembros del Equipo</label>
-                <table class="w-full text-left">
+                <label class="label ">Miembros del Equipo</label>
+                <table class="pt-30 w-full text-center">
                     <thead>
                         <tr class="bg-gray-100 h-16">
-                            <th >Nombre</th>
+                            <th  >Nombre</th>
                             <th >Rol</th>
                             <th>Acción</th>
                         </tr>
