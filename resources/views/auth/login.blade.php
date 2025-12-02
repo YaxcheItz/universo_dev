@@ -82,11 +82,7 @@
                         </label>
                     </div>
 
-                    <div class="text-sm">
-                        <a href="#" class="text-universo-purple hover:text-purple-400 transition">
-                            ¿Olvidaste tu contraseña?
-                        </a>
-                    </div>
+                    
                 </div>
 
                 <button type="submit" class="w-full btn-primary">
