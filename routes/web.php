@@ -8,11 +8,12 @@ use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\PerfilController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 
 // Página de inicio (redirige al login o dashboard según autenticación)
 Route::get('/', function () {
-    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
 

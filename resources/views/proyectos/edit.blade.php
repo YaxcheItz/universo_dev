@@ -1,0 +1,229 @@
+@extends('layouts.app')
+
+@section('title', 'Editar Proyecto - UniversoDev')
+
+@section('content')
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-universo-text mb-2">Editar Proyecto</h1>
+        <p class="text-universo-text-muted">Actualiza la información de tu proyecto</p>
+    </div>
+
+    <form action="{{ route('proyectos.update', $proyecto) }}" method="POST" class="space-y-6">
+        @csrf
+        @method('PUT')
+
+        <!-- Información Básica -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Información Básica</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-universo-text mb-2">Nombre del Proyecto *</label>
+                    <input type="text" name="name" id="name" required class="input-field" value="{{ old('name', $proyecto->name) }}" placeholder="Ej: Sistema de Gestión Escolar">
+                    @error('name')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="descripcion" class="block text-sm font-medium text-universo-text mb-2">Descripción *</label>
+                    <textarea name="descripcion" id="descripcion" rows="4" required class="input-field" placeholder="Describe tu proyecto...">{{ old('descripcion', $proyecto->descripcion) }}</textarea>
+                    @error('descripcion')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Tecnología -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Tecnología</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="lenguaje_principal" class="block text-sm font-medium text-universo-text mb-2">Lenguaje Principal *</label>
+                    <select name="lenguaje_principal" id="lenguaje_principal" required class="input-field">
+                        <option value="">Seleccionar lenguaje</option>
+                        @foreach(['JavaScript', 'Python', 'Java', 'PHP', 'C#', 'C++', 'Ruby', 'Go', 'Swift', 'Kotlin', 'TypeScript', 'Rust'] as $lenguaje)
+                            <option value="{{ $lenguaje }}" {{ old('lenguaje_principal', $proyecto->lenguaje_principal) == $lenguaje ? 'selected' : '' }}>{{ $lenguaje }}</option>
+                        @endforeach
+                    </select>
+                    @error('lenguaje_principal')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-universo-text mb-2">Tecnologías Adicionales</label>
+                    <div id="tecnologias-container" class="space-y-2">
+                        @if(old('tecnologias', $proyecto->tecnologias))
+                            @foreach(old('tecnologias', $proyecto->tecnologias) as $index => $tecnologia)
+                                <div class="flex gap-2">
+                                    <input type="text" name="tecnologias[]" class="input-field" value="{{ $tecnologia }}" placeholder="Ej: React, Node.js">
+                                    @if($index === 0)
+                                        <button type="button" onclick="agregarTecnologia()" class="btn-secondary">+</button>
+                                    @else
+                                        <button type="button" onclick="this.parentElement.remove()" class="btn-secondary">-</button>
+                                    @endif
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="flex gap-2">
+                                <input type="text" name="tecnologias[]" class="input-field" placeholder="Ej: React, Node.js">
+                                <button type="button" onclick="agregarTecnologia()" class="btn-secondary">+</button>
+                            </div>
+                        @endif
+                    </div>
+                    @error('tecnologias')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado y Fechas -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Estado del Proyecto</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label for="estado" class="block text-sm font-medium text-universo-text mb-2">Estado *</label>
+                    <select name="estado" id="estado" required class="input-field">
+                        @foreach(['Planificación', 'En Desarrollo', 'Pruebas', 'Producción', 'Mantenimiento', 'Archivado'] as $estado)
+                            <option value="{{ $estado }}" {{ old('estado', $proyecto->estado) == $estado ? 'selected' : '' }}>{{ $estado }}</option>
+                        @endforeach
+                    </select>
+                    @error('estado')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="fecha_inicio" class="block text-sm font-medium text-universo-text mb-2">Fecha de Inicio</label>
+                    <input type="date" name="fecha_inicio" id="fecha_inicio" class="input-field" value="{{ old('fecha_inicio', $proyecto->fecha_inicio?->format('Y-m-d')) }}">
+                    @error('fecha_inicio')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="fecha_fin_estimada" class="block text-sm font-medium text-universo-text mb-2">Fecha de Fin Estimada</label>
+                    <input type="date" name="fecha_fin_estimada" id="fecha_fin_estimada" class="input-field" value="{{ old('fecha_fin_estimada', $proyecto->fecha_fin_estimada?->format('Y-m-d')) }}">
+                    @error('fecha_fin_estimada')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                @if(in_array($proyecto->estado, ['Producción', 'Archivado']))
+                    <div class="md:col-span-2">
+                        <label for="fecha_fin_real" class="block text-sm font-medium text-universo-text mb-2">Fecha de Fin Real</label>
+                        <input type="date" name="fecha_fin_real" id="fecha_fin_real" class="input-field" value="{{ old('fecha_fin_real', $proyecto->fecha_fin_real?->format('Y-m-d')) }}">
+                        @error('fecha_fin_real')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Enlaces -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Enlaces</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="repositorio_url" class="block text-sm font-medium text-universo-text mb-2">
+                        <span class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                            URL del Repositorio
+                        </span>
+                    </label>
+                    <input type="url" name="repositorio_url" id="repositorio_url" class="input-field" value="{{ old('repositorio_url', $proyecto->repositorio_url) }}" placeholder="https://github.com/usuario/proyecto">
+                    @error('repositorio_url')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="demo_url" class="block text-sm font-medium text-universo-text mb-2">
+                        <span class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            URL de Demo/Sitio Web
+                        </span>
+                    </label>
+                    <input type="url" name="demo_url" id="demo_url" class="input-field" value="{{ old('demo_url', $proyecto->demo_url) }}" placeholder="https://miproyecto.com">
+                    @error('demo_url')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="documentacion_url" class="block text-sm font-medium text-universo-text mb-2">
+                        <span class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            URL de Documentación
+                        </span>
+                    </label>
+                    <input type="url" name="documentacion_url" id="documentacion_url" class="input-field" value="{{ old('documentacion_url', $proyecto->documentacion_url) }}" placeholder="https://docs.miproyecto.com">
+                    @error('documentacion_url')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Estadísticas del Repositorio</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="estrellas" class="block text-sm font-medium text-universo-text mb-2">⭐ Estrellas</label>
+                    <input type="number" name="estrellas" id="estrellas" min="0" class="input-field" value="{{ old('estrellas', $proyecto->estrellas) }}">
+                    @error('estrellas')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="forks" class="block text-sm font-medium text-universo-text mb-2">🔱 Forks</label>
+                    <input type="number" name="forks" id="forks" min="0" class="input-field" value="{{ old('forks', $proyecto->forks) }}">
+                    @error('forks')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="contribuidores" class="block text-sm font-medium text-universo-text mb-2">👥 Contribuidores</label>
+                    <input type="number" name="contribuidores" id="contribuidores" min="1" class="input-field" value="{{ old('contribuidores', $proyecto->contribuidores) }}">
+                    @error('contribuidores')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="commits" class="block text-sm font-medium text-universo-text mb-2">📝 Commits</label>
+                    <input type="number" name="commits" id="commits" min="0" class="input-field" value="{{ old('commits', $proyecto->commits) }}">
+                    @error('commits')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Configuración</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <input type="hidden" name="es_publico" value="0">
+                    <input type="checkbox" name="es_publico" id="es_publico" value="1" class="mr-2" {{ old('es_publico', $proyecto->es_publico) ? 'checked' : '' }}>
+                    <label for="es_publico" class="text-sm text-universo-text">
+                        Proyecto público (visible para toda la comunidad)
+                    </label>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="hidden" name="es_trending" value="0">
+                    <input type="checkbox" name="es_trending" id="es_trending" value="1" class="mr-2" {{ old('es_trending', $proyecto->es_trending) ? 'checked' : '' }}>
+                    <label for="es_trending" class="text-sm text-universo-text">
+                        Marcar como trending (destacado)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-4 justify-end">
+            <a href="{{ route('proyectos.show', $proyecto) }}" class="btn-secondary">Cancelar</a>
+            <button type="submit" class="btn-primary">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function agregarTecnologia() {
+    const container = document.getElementById('tecnologias-container');
+    const div = document.createElement('div');
+    div.className = 'flex gap-2';
+    div.innerHTML = `
+        <input type="text" name="tecnologias[]" class="input-field" placeholder="Ej: Docker, PostgreSQL">
+        <button type="button" onclick="this.parentElement.remove()" class="btn-secondary">-</button>
+    `;
+    container.appendChild(div);
+}
+</script>
+@endsection
