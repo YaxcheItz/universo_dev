@@ -50,7 +50,8 @@ class EquipoController extends Controller
             'ML Engineer',
             'QA Engineer',
             'UI/UX Designer',
-            'Product Manager'
+            'Product Manager',
+            'Otro'
         ];
 
         return view('equipos.create', compact('rolesDisponibles'));
@@ -78,6 +79,17 @@ class EquipoController extends Controller
         'miembros.*.user_id' => 'nullable|exists:users,id',
         'miembros.*.rol_equipo' => 'nullable|string',
     ]);
+    //evitar duplicados
+    $miembrosIds = collect($validated['miembros'] ?? [])
+    ->pluck('user_id')
+    ->filter() // elimina null
+    ->all();
+
+    if (count($miembrosIds) !== count(array_unique($miembrosIds))) {
+        return back()->withErrors([
+            'miembros' => 'No puedes agregar el mismo usuario más de una vez.'
+        ])->withInput();
+    }
 
     /* Convertir tecnologías a array */
     $tecnologiasArray = [];
@@ -159,13 +171,33 @@ class EquipoController extends Controller
     /**
      * Mostrar detalles del equipo
      */
+   /**
+ * Mostrar detalles del equipo
+ */
     public function show(Equipo $equipo)
     {
         $equipo->load(['lider', 'miembros', 'proyectos', 'torneoParticipaciones.torneo']);
 
         // verificar si el usuario actual es miembro del equipo
-        $esMiembro = $equipo->miembros->contains('id', Auth::id());//para poder eliminar si es lider
-        return view('equipos.show', compact('equipo', 'esMiembro'));
+        $esMiembro = $equipo->miembros->contains('id', Auth::id());
+        
+        // Roles disponibles para unirse al equipo
+        $rolesDisponibles = [
+            'Programador Frontend',
+            'Programador Backend',
+            'Full-Stack',
+            'Android',
+            'iOS',
+            'DevOps',
+            'Data Scientist',
+            'ML Engineer',
+            'QA Engineer',
+            'UI/UX Designer',
+            'Product Manager',
+            'Otro'
+        ];
+        
+        return view('equipos.show', compact('equipo', 'esMiembro', 'rolesDisponibles'));
     }
 
     /**
@@ -191,8 +223,9 @@ class EquipoController extends Controller
             'UI/UX Designer',
             'Product Manager'
         ];
+        $miembros = $equipo->miembros()->get();
 
-        return view('equipos.edit', compact('equipo', 'rolesDisponibles'));
+        return view('equipos.edit', compact('equipo', 'rolesDisponibles', 'miembros'));
     }
 
     /**
@@ -204,23 +237,79 @@ class EquipoController extends Controller
             abort(403, 'No tienes permiso para editar este equipo');
         }
 
+        // Validación
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:equipos,name,' . $equipo->id,
             'descripcion' => 'nullable|string',
             'max_miembros' => 'required|integer|min:2|max:50',
             'tecnologias' => 'nullable|string',
+            'estado' => 'required|string|in:Activo,Inactivo',
             'es_publico' => 'boolean',
             'acepta_miembros' => 'boolean',
-            'estado' => 'required|string|in:Activo,Inactivo',
+            'miembros' => 'nullable|array',
+            'miembros.*.rol_equipo' => 'nullable|string',
+            'nuevo_miembro.user_id' => 'nullable|exists:users,id',
+            'nuevo_miembro.rol_equipo' => 'nullable|string',
         ]);
 
-        $validated['es_publico'] = $request->has('es_publico');
-        $validated['acepta_miembros'] = $request->has('acepta_miembros');
+        // Convertir tecnologías
+        $tecnologiasArray = $request->filled('tecnologias') 
+            ? array_map('trim', explode(',', $request->tecnologias)) 
+            : [];
 
-        $equipo->update($validated);
+        // Actualizar datos básicos
+        $equipo->update([
+            'name' => $validated['name'],
+            'descripcion' => $validated['descripcion'],
+            'max_miembros' => $validated['max_miembros'],
+            'tecnologias' => $tecnologiasArray,
+            'estado' => $validated['estado'],
+            'es_publico' => $request->boolean('es_publico'),
+            'acepta_miembros' => $request->boolean('acepta_miembros'),
+        ]);
+
+        // --- Manejo de miembros existentes ---
+        $liderId = $equipo->lider_id;
+
+        if (!empty($validated['miembros'])) {
+            foreach ($validated['miembros'] as $userId => $datos) {
+                $rol = $datos['rol_equipo'] ?? 'Miembro';
+
+                // No permitir cambiar al líder a otro miembro desde aquí
+                if ($userId == $liderId && $rol !== 'Líder de Equipo') {
+                    $rol = 'Líder de Equipo';
+                }
+
+                // Actualizar solo si el miembro existe
+                if ($equipo->miembros->contains('id', $userId)) {
+                    $equipo->miembros()->updateExistingPivot($userId, [
+                        'rol_equipo' => $rol,
+                        'estado' => 'Activo',
+                    ]);
+                }
+            }
+        }
+
+        // --- Agregar nuevo miembro si se proporcionó ---
+        if ($request->filled('nuevo_miembro.user_id') && $request->filled('nuevo_miembro.rol_equipo')) {
+            $userId = $request->nuevo_miembro['user_id'];
+            $rol = $request->nuevo_miembro['rol_equipo'];
+
+            if (!$equipo->miembros->contains('id', $userId)) {
+                $equipo->miembros()->attach($userId, [
+                    'rol_equipo' => $rol,
+                    'fecha_ingreso' => now(),
+                    'estado' => 'Activo',
+                ]);
+            }
+        }
+
+        // Actualizar cantidad de miembros
+        $equipo->miembros_actuales = $equipo->miembros()->count();
+        $equipo->save();
 
         return redirect()->route('equipos.show', $equipo)
-            ->with('success', 'Equipo actualizado exitosamente');
+                        ->with('success', 'Equipo actualizado exitosamente');
     }
 
     /**
@@ -329,18 +418,12 @@ class EquipoController extends Controller
             return back()->with('error', 'No puedes removerte a ti mismo como líder');
         }
 
-        $miembro = EquipoMiembro::where('equipo_id', $equipo->id)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$miembro) {
+        if (!$equipo->miembros->contains('id', $user->id)) {
             return back()->with('error', 'Este usuario no es miembro del equipo');
         }
 
-        $miembro->update([
-            'estado' => 'Retirado',
-            'fecha_salida' => now(),
-        ]);
+        // Remover al miembro
+        $equipo->miembros()->detach($user->id);
 
         $equipo->decrement('miembros_actuales');
 

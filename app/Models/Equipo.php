@@ -90,8 +90,10 @@ class Equipo extends Model
      */
     public function scopeActivos($query)
     {
-        return $query->where('estado', 'Activo');
+        return $query->where('estado', '!=', 'Inactivo')
+                    ->orWhereNull('estado');
     }
+
 
     /**
      * Equipos públicos
