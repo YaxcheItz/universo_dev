@@ -56,10 +56,6 @@
             </label>
         </div>
 
-        <div class="flex items-center gap-2">
-            <input type="checkbox" name="yo_lider" id="yo_lider" value="1" @checked(old('yo_lider'))>
-            <label for="yo_lider" class="flex items-center gap-2">Yo seré el líder del equipo</label>
-        </div>
 
         <div>
             <h2 class="text-xl font-semibold text-universo-text mb-2">Agregar miembros</h2>
@@ -78,61 +74,40 @@
 
 
 <script>
-    const yoLiderCheckbox = document.getElementById('yo_lider');
     const miembrosContainer = document.getElementById('miembros-container');
     const agregarBtn = document.getElementById('agregar-miembro');
 
-    const roles = @json($rolesDisponibles ?? []);
-    const users = @json(\App\Models\User::select('id','name')->get());
+    // excluir  Lider de Equipo
+    const roles = @json($rolesDisponibles ?? []).filter(r => r.toLowerCase() !== 'líder de equipo');
 
-    function actualizarOpcionesLider() {
-        const selectsRol = document.querySelectorAll('select[name*="[rol_equipo]"]');
+    let users = @json(\App\Models\User::select('id','name')->get());
+    const loggedUserId = {{ auth()->id() }};
 
-        // Si yo soy el lider bloquear para los demas
-        if (yoLiderCheckbox.checked) {
-            selectsRol.forEach(select => {
-                [...select.options].forEach(option => {
-                    if (option.value === "Líder de Equipo") {
-                        option.disabled = true;
+    // Quitar al usuario actual de la lista de disponibles
+    users = users.filter(u => u.id !== loggedUserId);
 
-                        // Si un select ya lo tine se limpia
-                        if (select.value === "Líder de Equipo") {
-                            select.value = "";
-                        }
-                    }
-                });
-            });
+    function actualizarOpcionesUsuarios() {
+        const selects = miembrosContainer.querySelectorAll('select[name*="[user_id]"]');
+        const seleccionados = Array.from(selects).map(s => s.value).filter(v => v);
+        return users.filter(u => !seleccionados.includes(u.id.toString()));
+    }
+
+    agregarBtn.addEventListener('click', () => {
+        const index = miembrosContainer.children.length;
+        const disponibles = actualizarOpcionesUsuarios();
+
+        if (disponibles.length === 0) {
+            alert('No hay más usuarios disponibles para agregar.');
             return;
         }
 
-        let liderSeleccionado = false;
-
-        selectsRol.forEach(select => {
-            if (select.value === "Líder de Equipo") {
-                liderSeleccionado = true;
-            }
-        });
-
-        selectsRol.forEach(select => {
-            [...select.options].forEach(option => {
-                if (option.value === "Líder de Equipo") {
-                    option.disabled = liderSeleccionado && select.value !== "Líder de Equipo";
-                }
-            });
-        });
-    }
-
-    // Para gregar mienbros
-    agregarBtn.addEventListener('click', () => {
-        const index = miembrosContainer.children.length;
-
         const div = document.createElement('div');
-        div.classList.add('flex', 'gap-4', 'items-center');
+        div.classList.add('flex', 'gap-2', 'items-center');
 
         div.innerHTML = `
             <select name="miembros[${index}][user_id]" class="input-field">
                 <option value="">Seleccionar usuario</option>
-                ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+                ${disponibles.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
             </select>
 
             <select name="miembros[${index}][rol_equipo]" class="input-field rol-select">
@@ -145,24 +120,9 @@
 
         miembrosContainer.appendChild(div);
 
-        // botones de eliminar
-        div.querySelector('.remove-btn').addEventListener('click', () => {
-            div.remove();
-            actualizarOpcionesLider();
-        });
-
-        // detectar cambios de rol
-        div.querySelector('.rol-select').addEventListener('change', actualizarOpcionesLider);
-
-        // actualizar al agregar
-        actualizarOpcionesLider();
+        div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
     });
-
-    // detectar cambios en checkbox yo_lider
-    yoLiderCheckbox.addEventListener('change', actualizarOpcionesLider);
-
 </script>
-
 
 
 
