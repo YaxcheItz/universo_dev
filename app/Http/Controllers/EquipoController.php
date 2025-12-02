@@ -59,35 +59,69 @@ class EquipoController extends Controller
     /**
      * Guardar nuevo equipo
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:equipos',
-            'descripcion' => 'nullable|string',
-            'max_miembros' => 'required|integer|min:2|max:50',
-            'tecnologias' => 'nullable|array',
-            'es_publico' => 'boolean',
-            'acepta_miembros' => 'boolean',
-            'miembros' => 'nullable|array',
-            'miembros.*.user_id' => 'required|exists:users,id',
-            'miembros.*.rol_equipo' => 'required|string',
-        ]);
 
-        // Crear el equipo
-        $equipo = Equipo::create([
-            'name' => $validated['name'],
-            'descripcion' => $validated['descripcion'] ?? null,
-            'lider_id' => Auth::id(),
-            'max_miembros' => $validated['max_miembros'],
-            'miembros_actuales' => 1,
-            'tecnologias' => $validated['tecnologias'] ?? [],
-            'es_publico' => $request->has('es_publico'),
-            'acepta_miembros' => $request->has('acepta_miembros'),
-            'estado' => 'Activo',
-            'fecha_creacion' => now(),
-        ]);
+    
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'descripcion' => 'nullable|string',
+        'avatar' => 'nullable|string',
+        'max_miembros' => 'required|integer|min:1',
+        'tecnologias' => 'nullable|string',  // viene como texto, no array
+        'es_publico' => 'boolean',
+        'acepta_miembros' => 'boolean',
+        'yo_lider' => 'nullable|boolean',
 
-        // Agregar al líder como miembro
+        // Validación flexible de miembros
+        'miembros' => 'nullable|array',
+        'miembros.*.user_id' => 'nullable|exists:users,id',
+        'miembros.*.rol_equipo' => 'nullable|string',
+    ]);
+
+    /* Convertir tecnologías a array */
+    $tecnologiasArray = [];
+    if ($request->filled('tecnologias')) {
+        $tecnologiasArray = array_map('trim', explode(',', $request->tecnologias));
+    }
+
+    $yoLider = $request->boolean('yo_lider', true);
+
+    /* Si no sera el líder, validar que exista un líder en miembros */
+    if (!$yoLider) {
+        $lideres = collect($validated['miembros'] ?? [])
+            ->where('rol_equipo', 'Líder de Equipo')
+            ->whereNotNull('user_id');
+
+        if ($lideres->count() !== 1) {
+            return back()->withErrors([
+                'miembros' => 'Debes seleccionar exactamente un líder del equipo.',
+            ])->withInput();
+        }
+
+        $liderId = $lideres->first()['user_id'];
+    } else {
+        $liderId = Auth::id();
+    }
+
+    /* CREAR EQUIPO */
+    $equipo = Equipo::create([
+        'name' => $validated['name'],
+        'descripcion' => $validated['descripcion'],
+        'avatar' => $validated['avatar'] ?? null,
+        'max_miembros' => $validated['max_miembros'],
+        'tecnologias' => $tecnologiasArray,
+        'es_publico' => $request->boolean('es_publico'),
+        'acepta_miembros' => $request->boolean('acepta_miembros'),
+        'lider_id' => $liderId,
+        'fecha_creacion' => now(),
+        'miembros_actuales' => 0, // se irá sumando
+    ]);
+
+    /* AGREGAR MIEMBROS */
+
+    // Caso: el creador será el líder
+    if ($yoLider) {
         EquipoMiembro::create([
             'equipo_id' => $equipo->id,
             'user_id' => Auth::id(),
@@ -96,24 +130,30 @@ class EquipoController extends Controller
             'estado' => 'Activo',
         ]);
 
-        // Agregar miembros adicionales si se proporcionaron
-        if (isset($validated['miembros'])) {
-            foreach ($validated['miembros'] as $miembro) {
-                if ($miembro['user_id'] != Auth::id()) {
-                    EquipoMiembro::create([
-                        'equipo_id' => $equipo->id,
-                        'user_id' => $miembro['user_id'],
-                        'rol_equipo' => $miembro['rol_equipo'],
-                        'fecha_ingreso' => now(),
-                        'estado' => 'Activo',
-                    ]);
-                    $equipo->increment('miembros_actuales');
-                }
-            }
-        }
+        $equipo->increment('miembros_actuales');
+    }
 
-        return redirect()->route('equipos.show', $equipo)
-            ->with('success', '¡Equipo creado exitosamente!');
+    // Agregar miembros enviados
+    if (isset($validated['miembros'])) {
+        foreach ($validated['miembros'] as $miembro) {
+
+            if (empty($miembro['user_id']) || empty($miembro['rol_equipo'])) {
+                continue; // ignorar filas vacías
+            }
+
+            EquipoMiembro::create([
+                'equipo_id' => $equipo->id,
+                'user_id' => $miembro['user_id'],
+                'rol_equipo' => $miembro['rol_equipo'],
+                'fecha_ingreso' => now(),
+                'estado' => 'Activo',
+            ]);
+
+            $equipo->increment('miembros_actuales');
+        }
+    }
+
+    return redirect()->route('equipos.index')->with('success', 'Equipo creado con éxito.');
     }
 
     /**
@@ -168,7 +208,7 @@ class EquipoController extends Controller
             'name' => 'required|string|max:255|unique:equipos,name,' . $equipo->id,
             'descripcion' => 'nullable|string',
             'max_miembros' => 'required|integer|min:2|max:50',
-            'tecnologias' => 'nullable|array',
+            'tecnologias' => 'nullable|string',
             'es_publico' => 'boolean',
             'acepta_miembros' => 'boolean',
             'estado' => 'required|string|in:Activo,Inactivo',
@@ -241,23 +281,30 @@ class EquipoController extends Controller
             abort(403, 'Solo el líder puede agregar miembros');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'rol_equipo' => 'required|string',
+            'rol_equipo' => 'required|string'
         ]);
+
+        // No permitir agregar otro líder si ya existe uno
+        if ($validated['rol_equipo'] === "Líder de Equipo") {
+            return back()->withErrors([
+                'rol_equipo' => 'No puedes asignar otro líder; ya existe un líder.'
+            ]);
+        }
 
         if ($equipo->miembros_actuales >= $equipo->max_miembros) {
             return back()->with('error', 'El equipo está lleno');
         }
 
-        if ($equipo->miembros->contains('id', $request->user_id)) {
+        if ($equipo->miembros->contains('user_id', $validated['user_id'])) {
             return back()->with('error', 'Este usuario ya es miembro del equipo');
         }
 
         EquipoMiembro::create([
             'equipo_id' => $equipo->id,
-            'user_id' => $request->user_id,
-            'rol_equipo' => $request->rol_equipo,
+            'user_id' => $validated['user_id'],
+            'rol_equipo' => $validated['rol_equipo'],
             'fecha_ingreso' => now(),
             'estado' => 'Activo',
         ]);
@@ -266,6 +313,8 @@ class EquipoController extends Controller
 
         return back()->with('success', 'Miembro agregado exitosamente');
     }
+
+
 
     /**
      * Remover miembro (solo líder)
