@@ -55,8 +55,23 @@
             </div>
             
             @if(Auth::id() === $equipo->lider_id)
-                <a href="{{ route('equipos.edit', $equipo) }}" class="btn-primary px-4 py-2 text-sm whitespace-nowrap">Editar</a>
+                <div class="flex gap-2">
+                    <!-- Editar -->
+                    <a href="{{ route('equipos.edit', $equipo) }}"
+                    class="btn-primary  py-4 text-sm whitespace-nowrap">
+                        Editar
+                    </a>
+
+                    <!-- Eliminar el equipo completo -->
+                    <button
+                        type="button"
+                        onclick="confirmarEliminacionEquipo()"
+                        class=" py-4 text-sm text-red-500 whitespace-nowrap">
+                        Eliminar
+                    </button>
+                </div>
             @endif
+
         </div>
     </div>
 
@@ -165,10 +180,9 @@
             </div>
         </div>
 
-        <!-- Contenido Principal -->
+    
         <div class="lg:col-span-2 space-y-6 lg:order-1">
             
-            <!-- Miembros con diseño de grid -->
             <div class="card">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-universo-text flex items-center gap-2">
@@ -210,18 +224,7 @@
                                         </div>
                                     </div>
 
-                                    @if(Auth::id() === $equipo->lider_id && $miembro->id !== $equipo->lider_id)
-                                        <form action="{{ route('equipos.removerMiembro', [$equipo, $miembro]) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="text-red-400 hover:text-red-300 text-xs opacity-0 group-hover:opacity-100 transition">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <line x1="18" x2="6" y1="6" y2="18"></line>
-                                                    <line x1="6" x2="18" y1="6" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    @endif
+                                    
                                 </div>
                             </div>
                         @endforeach
@@ -289,6 +292,17 @@ function copiarEnlace() {
         alert('¡Enlace copiado al portapapeles!');
     });
 }
+function confirmarEliminacionEquipo() {
+    const confirmar = confirm(
+        'Esta acción eliminará el equipo PERMANENTEMENTE.\n' +
+        'Se perderán todos los miembros y datos.\n\n' +
+        '¿Deseas continuar?'
+    );
+
+    if (confirmar) {
+        document.getElementById('form-eliminar-equipo').submit();
+    }
+}
 </script>
 
 @if(session('success'))
@@ -302,4 +316,16 @@ function copiarEnlace() {
     alert('{{ session('error') }}');
 </script>
 @endif
+
+@if(Auth::id() === $equipo->lider_id)
+<form id="form-eliminar-equipo"
+      action="{{ route('equipos.destroy', $equipo) }}"
+      method="POST"
+      class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+@endif
+
+
 @endsection

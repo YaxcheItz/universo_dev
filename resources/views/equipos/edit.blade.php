@@ -94,10 +94,10 @@
                 <label class="label">Miembros del Equipo</label>
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2">Nombre</th>
-                            <th class="px-4 py-2">Rol</th>
-                            <th class="px-4 py-2">Acción</th>
+                        <tr class="bg-gray-100 h-16">
+                            <th >Nombre</th>
+                            <th >Rol</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,25 +108,25 @@
                                     @if($miembro->id === $equipo->lider_id)
                                         {{-- El líder tiene su rol fijo --}}
                                         <input type="hidden" name="miembros[{{ $miembro->id }}][rol_equipo]" value="{{ $miembro->pivot->rol_equipo }}">
-                                        <span class="input-field bg-gray-100 cursor-not-allowed inline-block">
+                                        <span class="input-field">
                                             {{ $miembro->pivot->rol_equipo }} (Líder)
                                         </span>
                                     @else
                                         {{-- Los demás miembros pueden cambiar su rol --}}
                                         <select 
                                             name="miembros[{{ $miembro->id }}][rol_equipo]" 
-                                            class="input-field rol-select"
-                                            data-miembro-id="{{ $miembro->id }}"
-                                            data-es-lider="false">
+                                            class="input-field"
+                                        >
                                             @foreach($rolesDisponibles as $rol)
-                                                @php
-                                                    $selected = ($miembro->pivot->rol_equipo === $rol) ? 'selected' : '';
-                                                @endphp
-                                                <option value="{{ $rol }}" {{ $selected }}>
+                                                @continue($rol === 'Líder de Equipo') 
+
+                                                <option value="{{ $rol }}"
+                                                    {{ $miembro->pivot->rol_equipo === $rol ? 'selected' : '' }}>
                                                     {{ $rol }}
                                                 </option>
                                             @endforeach
                                         </select>
+
                                     @endif
                                 </td>
                                 
@@ -135,11 +135,11 @@
                                         <button 
                                             type="button"
                                             onclick="confirmarEliminacion({{ $miembro->id }})"
-                                            class="text-red-600 hover:text-red-800">
+                                            class="text-red-500">
                                             Eliminar
                                         </button>
                                     @else
-                                        <span class="text-gray-500">Líder</span>
+                                        <span class="text-green-500">Líder</span>
                                     @endif
                                 </td>
                             </tr>
@@ -161,7 +161,6 @@
     </div>
 </div>
 
-{{-- Formularios de eliminación FUERA del formulario principal --}}
 @foreach($miembros as $miembro)
     @if($miembro->id !== $equipo->lider_id)
         <form 
@@ -176,104 +175,30 @@
 @endforeach
 
 <script>
-// Función para confirmar y eliminar miembro
-function confirmarEliminacion(miembroId) {
-    if (confirm('¿Estás seguro de eliminar este miembro?')) {
-        document.getElementById('form-eliminar-' + miembroId).submit();
-    }
-}
+  
+    function confirmarEliminacion(miembroId) {
+        if (confirm('¿Estás seguro de eliminar este miembro?')) {
+            const form = document.getElementById('form-eliminar-' + miembroId);
 
-// Código existente para manejo de roles
-document.addEventListener('DOMContentLoaded', function() {
-    const selectsRol = document.querySelectorAll('.rol-select');
-    const liderId = {{ $equipo->lider_id }};
-    
-    // Guardar todas las opciones originales de cada select
-    const opcionesOriginales = new Map();
-    selectsRol.forEach(select => {
-        const miembroId = select.dataset.miembroId;
-        const opciones = Array.from(select.options).map(option => ({
-            value: option.value,
-            text: option.textContent.trim()
-        }));
-        opcionesOriginales.set(miembroId, opciones);
-    });
-    
-    function actualizarOpcionesDisponibles() {
-        // Obtener todos los roles seleccionados
-        const rolesSeleccionados = new Map();
-        
-        selectsRol.forEach(select => {
-            const miembroId = select.dataset.miembroId;
-            const rolSeleccionado = select.value;
-            rolesSeleccionados.set(miembroId, rolSeleccionado);
-        });
-        
-        // Agregar el rol del líder a los roles no disponibles
-        const rolLider = document.querySelector('input[name="miembros[' + liderId + '][rol_equipo]"]');
-        if (rolLider) {
-            rolesSeleccionados.set(liderId.toString(), rolLider.value);
+            if (form) {
+                form.submit();
+            } else {
+                console.error('Formulario no encontrado para el miembro:', miembroId);
+            }
         }
-        
-        // Actualizar cada select
-        selectsRol.forEach(select => {
-            const miembroActual = select.dataset.miembroId;
-            const valorActual = select.value;
-            const opcionesBase = opcionesOriginales.get(miembroActual);
-            
-            // Limpiar todas las opciones
-            select.innerHTML = '';
-            
-            // Agregar solo las opciones disponibles
-            opcionesBase.forEach(opcion => {
-                // Verificar si este rol está siendo usado por otro miembro
-                let estaUsado = false;
-                
-                for (const [miembroId, rol] of rolesSeleccionados.entries()) {
-                    // No está en uso si:
-                    // 1. Es el miembro actual (puede mantener su rol)
-                    // 2. El rol no coincide con ningún otro
-                    if (miembroId !== miembroActual && rol === opcion.value) {
-                        estaUsado = true;
-                        break;
-                    }
-                }
-                
-                // Solo agregar la opción si no está en uso
-                if (!estaUsado) {
-                    const option = document.createElement('option');
-                    option.value = opcion.value;
-                    option.textContent = opcion.text;
-                    
-                    if (opcion.value === valorActual) {
-                        option.selected = true;
-                    }
-                    
-                    select.appendChild(option);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Deshabilitar por seguridad cualquier opción "Líder de equipo" si existiera
+        document
+            .querySelectorAll('select[name*="[rol_equipo]"] option')
+            .forEach(option => {
+                if (option.value === 'Líder de equipo') {
+                    option.disabled = true;
                 }
             });
-            
-            // Si el select quedó vacío (no debería pasar), agregar al menos el valor actual
-            if (select.options.length === 0 && valorActual) {
-                const option = document.createElement('option');
-                option.value = valorActual;
-                option.textContent = valorActual;
-                option.selected = true;
-                select.appendChild(option);
-            }
-        });
-    }
-    
-    // Ejecutar al cargar la página
-    actualizarOpcionesDisponibles();
-    
-    // Ejecutar cada vez que cambie un select
-    selectsRol.forEach(select => {
-        select.addEventListener('change', function() {
-            actualizarOpcionesDisponibles();
-        });
     });
-});
 </script>
+
 
 @endsection
