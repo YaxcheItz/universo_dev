@@ -130,7 +130,7 @@ class TorneoController extends Controller
         }
 
         // Equipos del usuario que pueden inscribirse (y que no están ya inscritos)
-        $equiposDisponibles = $user->equiposLiderados()
+        $equiposDisponibles = Equipo::where('lider_id', $user->id)
             ->where('estado', 'Activo')
             ->whereDoesntHave('torneoParticipaciones', function($query) use ($torneo) {
                 $query->where('torneo_id', $torneo->id);
