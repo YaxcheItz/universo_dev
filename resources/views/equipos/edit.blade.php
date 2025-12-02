@@ -44,14 +44,16 @@
                 </select>
             </div>
 
-            <input type="hidden" name="acepta_miembros" value="0">
-            <input type="checkbox" id="acepta_miembros" name="acepta_miembros"
-                class="w-4 h-4 text-universo-purple"
-                value="1"
-                {{ $equipo->acepta_miembros ? 'checked' : '' }}>
-            <label for="acepta_miembros" class="text-sm text-universo-text">
-                Permitir que nuevos miembros se unan
-            </label>
+            <div class="flex items-center gap-2">
+                <input type="hidden" name="acepta_miembros" value="0">
+                <input type="checkbox" id="acepta_miembros" name="acepta_miembros"
+                    class="w-4 h-4 text-universo-purple"
+                    value="1"
+                    {{ $equipo->acepta_miembros ? 'checked' : '' }}>
+                <label for="acepta_miembros" class="text-sm text-universo-text">
+                    Permitir que nuevos miembros se unan
+                </label>
+            </div>
 
             <div class="flex items-center gap-2">
                 <input type="hidden" name="es_publico" value="0">
@@ -130,11 +132,12 @@
                                 
                                 <td class="px-4 py-2">
                                     @if($miembro->id !== $equipo->lider_id)
-                                        <form method="POST" action="{{ route('equipos.removerMiembro', [$equipo->id, $miembro->id]) }}" onsubmit="return confirm('¿Estás seguro de eliminar este miembro?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800">Eliminar</button>
-                                        </form>
+                                        <button 
+                                            type="button"
+                                            onclick="confirmarEliminacion({{ $miembro->id }})"
+                                            class="text-red-600 hover:text-red-800">
+                                            Eliminar
+                                        </button>
                                     @else
                                         <span class="text-gray-500">Líder</span>
                                     @endif
@@ -158,7 +161,29 @@
     </div>
 </div>
 
+{{-- Formularios de eliminación FUERA del formulario principal --}}
+@foreach($miembros as $miembro)
+    @if($miembro->id !== $equipo->lider_id)
+        <form 
+            id="form-eliminar-{{ $miembro->id }}"
+            method="POST" 
+            action="{{ route('equipos.removerMiembro', [$equipo->id, $miembro->id]) }}"
+            style="display: none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+@endforeach
+
 <script>
+// Función para confirmar y eliminar miembro
+function confirmarEliminacion(miembroId) {
+    if (confirm('¿Estás seguro de eliminar este miembro?')) {
+        document.getElementById('form-eliminar-' + miembroId).submit();
+    }
+}
+
+// Código existente para manejo de roles
 document.addEventListener('DOMContentLoaded', function() {
     const selectsRol = document.querySelectorAll('.rol-select');
     const liderId = {{ $equipo->lider_id }};

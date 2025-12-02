@@ -56,10 +56,6 @@
             </label>
         </div>
 
-        <div class="flex items-center gap-2">
-            <input type="checkbox" name="yo_lider" id="yo_lider" value="1" @checked(old('yo_lider'))>
-            <label for="yo_lider" class="flex items-center gap-2">Yo seré el líder del equipo</label>
-        </div>
 
         <div>
             <h2 class="text-xl font-semibold text-universo-text mb-2">Agregar miembros</h2>
@@ -77,58 +73,18 @@
 </div>
 
 
-
 <script>
-    const yoLiderCheckbox = document.getElementById('yo_lider');
     const miembrosContainer = document.getElementById('miembros-container');
     const agregarBtn = document.getElementById('agregar-miembro');
 
-    const roles = @json($rolesDisponibles ?? []);
+    // excluir  Lider de Equipo
+    const roles = @json($rolesDisponibles ?? []).filter(r => r.toLowerCase() !== 'líder de equipo');
+
     let users = @json(\App\Models\User::select('id','name')->get());
     const loggedUserId = {{ auth()->id() }};
 
+    // Quitar al usuario actual de la lista de disponibles
     users = users.filter(u => u.id !== loggedUserId);
-
-    function agregarYoLider() {
-        let div = document.getElementById('miembro-yo');
-
-        if (yoLiderCheckbox.checked) {
-            if (!div) {
-                div = document.createElement('div');
-                div.classList.add('flex', 'gap-2', 'items-center');
-                div.id = 'miembro-yo';
-
-                div.innerHTML = `
-                    <input type="hidden" name="miembros[yo][user_id]" value="${loggedUserId}">
-                    <select name="miembros[yo][rol_equipo]" class="input-field rol-select">
-                        ${roles.map(r => {
-                            // Seleccionar automáticamente Líder de Equipo
-                            const selected = r.toLowerCase() === 'líder de equipo' ? 'selected' : '';
-                            return `<option value="${r}" ${selected}>${r}</option>`;
-                        }).join('')}
-                    </select>
-                    <span class="text-sm text-gray-500">Tú</span>
-                `;
-                miembrosContainer.prepend(div);
-            }
-        } else if (div) {
-            div.remove();
-        }
-
-        actualizarOpcionesLider();
-    }
-
-    function actualizarOpcionesLider() {
-        const selectsRol = document.querySelectorAll('select[name*="[rol_equipo]"]');
-        selectsRol.forEach(select => {
-            [...select.options].forEach(option => {
-                if (option.text.toLowerCase().includes('líder')) {
-                    // Si el checkbox está marcado, deshabilitar otros selects
-                    option.disabled = yoLiderCheckbox.checked && select.id !== 'miembro-yo';
-                }
-            });
-        });
-    }
 
     function actualizarOpcionesUsuarios() {
         const selects = miembrosContainer.querySelectorAll('select[name*="[user_id]"]');
@@ -138,15 +94,15 @@
 
     agregarBtn.addEventListener('click', () => {
         const index = miembrosContainer.children.length;
-
-        const div = document.createElement('div');
-        div.classList.add('flex', 'gap-2', 'items-center');
-
         const disponibles = actualizarOpcionesUsuarios();
-        if(disponibles.length === 0){
+
+        if (disponibles.length === 0) {
             alert('No hay más usuarios disponibles para agregar.');
             return;
         }
+
+        const div = document.createElement('div');
+        div.classList.add('flex', 'gap-2', 'items-center');
 
         div.innerHTML = `
             <select name="miembros[${index}][user_id]" class="input-field">
@@ -165,14 +121,7 @@
         miembrosContainer.appendChild(div);
 
         div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
-
-        actualizarOpcionesLider();
     });
-
-    yoLiderCheckbox.addEventListener('change', agregarYoLider);
-
-    // Inicializar
-    agregarYoLider();
 </script>
 
 

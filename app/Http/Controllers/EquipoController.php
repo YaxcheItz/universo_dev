@@ -50,7 +50,8 @@ class EquipoController extends Controller
             'ML Engineer',
             'QA Engineer',
             'UI/UX Designer',
-            'Product Manager'
+            'Product Manager',
+            'Otro'
         ];
 
         return view('equipos.create', compact('rolesDisponibles'));
@@ -170,13 +171,33 @@ class EquipoController extends Controller
     /**
      * Mostrar detalles del equipo
      */
+   /**
+ * Mostrar detalles del equipo
+ */
     public function show(Equipo $equipo)
     {
         $equipo->load(['lider', 'miembros', 'proyectos', 'torneoParticipaciones.torneo']);
 
         // verificar si el usuario actual es miembro del equipo
-        $esMiembro = $equipo->miembros->contains('id', Auth::id());//para poder eliminar si es lider
-        return view('equipos.show', compact('equipo', 'esMiembro'));
+        $esMiembro = $equipo->miembros->contains('id', Auth::id());
+        
+        // Roles disponibles para unirse al equipo
+        $rolesDisponibles = [
+            'Programador Frontend',
+            'Programador Backend',
+            'Full-Stack',
+            'Android',
+            'iOS',
+            'DevOps',
+            'Data Scientist',
+            'ML Engineer',
+            'QA Engineer',
+            'UI/UX Designer',
+            'Product Manager',
+            'Otro'
+        ];
+        
+        return view('equipos.show', compact('equipo', 'esMiembro', 'rolesDisponibles'));
     }
 
     /**
@@ -216,7 +237,7 @@ class EquipoController extends Controller
             abort(403, 'No tienes permiso para editar este equipo');
         }
 
-        // Validación del equipo
+        // Validación
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:equipos,name,' . $equipo->id,
             'descripcion' => 'nullable|string',
@@ -231,13 +252,12 @@ class EquipoController extends Controller
             'nuevo_miembro.rol_equipo' => 'nullable|string',
         ]);
 
-        // Convertir tecnologías a array
-        $tecnologiasArray = [];
-        if ($request->filled('tecnologias')) {
-            $tecnologiasArray = array_map('trim', explode(',', $request->tecnologias));
-        }
+        // Convertir tecnologías
+        $tecnologiasArray = $request->filled('tecnologias') 
+            ? array_map('trim', explode(',', $request->tecnologias)) 
+            : [];
 
-        // Actualizar datos básicos del equipo
+        // Actualizar datos básicos
         $equipo->update([
             'name' => $validated['name'],
             'descripcion' => $validated['descripcion'],
@@ -248,43 +268,29 @@ class EquipoController extends Controller
             'acepta_miembros' => $request->boolean('acepta_miembros'),
         ]);
 
-        // --- Manejo de miembros ---
-        $liderId = null;
-        $syncData = [];
+        // --- Manejo de miembros existentes ---
+        $liderId = $equipo->lider_id;
 
-        if ($request->has('miembros')) {
-            foreach ($request->miembros as $userId => $datos) {
+        if (!empty($validated['miembros'])) {
+            foreach ($validated['miembros'] as $userId => $datos) {
                 $rol = $datos['rol_equipo'] ?? 'Miembro';
 
-                // Registrar si es líder
-                if ($rol === 'Líder de Equipo') {
-                    if ($liderId) {
-                        return back()->withErrors([
-                            'miembros' => 'Solo puede haber un Líder de Equipo.'
-                        ])->withInput();
-                    }
-                    $liderId = $userId;
+                // No permitir cambiar al líder a otro miembro desde aquí
+                if ($userId == $liderId && $rol !== 'Líder de Equipo') {
+                    $rol = 'Líder de Equipo';
                 }
 
-                $syncData[$userId] = [
-                    'rol_equipo' => $rol,
-                    'estado' => 'Activo',
-                    'fecha_ingreso' => now(),
-                ];
+                // Actualizar solo si el miembro existe
+                if ($equipo->miembros->contains('id', $userId)) {
+                    $equipo->miembros()->updateExistingPivot($userId, [
+                        'rol_equipo' => $rol,
+                        'estado' => 'Activo',
+                    ]);
+                }
             }
-
-            // Sin errores, sincronizar miembros
-            $equipo->miembros()->sync($syncData);
-            $equipo->miembros_actuales = count($syncData);
         }
 
-        // Actualizar lider_id si se asignó un nuevo líder
-        if ($liderId) {
-            $equipo->lider_id = $liderId;
-            $equipo->save();
-        }
-
-        // Agregar nuevo miembro si se proporcionó
+        // --- Agregar nuevo miembro si se proporcionó ---
         if ($request->filled('nuevo_miembro.user_id') && $request->filled('nuevo_miembro.rol_equipo')) {
             $userId = $request->nuevo_miembro['user_id'];
             $rol = $request->nuevo_miembro['rol_equipo'];
@@ -295,15 +301,16 @@ class EquipoController extends Controller
                     'fecha_ingreso' => now(),
                     'estado' => 'Activo',
                 ]);
-                $equipo->increment('miembros_actuales');
             }
         }
 
-        return redirect()
-            ->route('equipos.show', $equipo)
-            ->with('success', 'Equipo actualizado exitosamente');
-    }
+        // Actualizar cantidad de miembros
+        $equipo->miembros_actuales = $equipo->miembros()->count();
+        $equipo->save();
 
+        return redirect()->route('equipos.show', $equipo)
+                        ->with('success', 'Equipo actualizado exitosamente');
+    }
 
     /**
      * Eliminar equipo
