@@ -88,6 +88,15 @@ class TorneoController extends Controller
             'es_publico' => 'boolean',
         ]);
 
+        // --- Custom Validation: Ensure 'Inscripciones Abiertas' is not set if registration end date is in the past ---
+        $fechaRegistroFin = \Carbon\Carbon::parse($request->input('fecha_registro_fin'));
+        $now = \Carbon\Carbon::now();
+
+        if ($request->input('estado') === 'Inscripciones Abiertas' && $fechaRegistroFin->isPast()) {
+            return back()->withErrors(['estado' => 'No puedes establecer el estado "Inscripciones Abiertas" si la fecha de fin de registro ya ha pasado. Por favor, selecciona "En Curso" o "Próximo" según corresponda.'])->withInput();
+        }
+        // --- End Custom Validation ---
+
         $validated['user_id'] = Auth::id();
         $validated['participantes_actuales'] = 0;
         $validated['es_publico'] = $request->input('es_publico', 0) == 1;
@@ -105,15 +114,30 @@ class TorneoController extends Controller
     {
         $torneo->load(['organizador', 'participaciones.equipo.lider', 'participaciones.proyecto']);
 
-        // Equipos del usuario que pueden inscribirse
-        $equiposDisponibles = Equipo::where('lider_id', Auth::id())
+        $user = Auth::user();
+        $equipoInscrito = null;
+
+        // Buscar si el usuario ya tiene un equipo inscrito
+        $participacionExistente = $torneo->participaciones()
+            ->whereHas('equipo', function ($query) use ($user) {
+                $query->where('lider_id', $user->id);
+            })
+            ->with('equipo')
+            ->first();
+        
+        if ($participacionExistente) {
+            $equipoInscrito = $participacionExistente->equipo;
+        }
+
+        // Equipos del usuario que pueden inscribirse (y que no están ya inscritos)
+        $equiposDisponibles = $user->equiposLiderados()
             ->where('estado', 'Activo')
             ->whereDoesntHave('torneoParticipaciones', function($query) use ($torneo) {
                 $query->where('torneo_id', $torneo->id);
             })
             ->get();
 
-        return view('torneos.show', compact('torneo', 'equiposDisponibles'));
+        return view('torneos.show', compact('torneo', 'equiposDisponibles', 'equipoInscrito'));
     }
 
     /**
@@ -249,6 +273,39 @@ class TorneoController extends Controller
         $torneo->increment('participantes_actuales');
 
         return back()->with('success', '¡Equipo inscrito exitosamente en el torneo!');
+    }
+
+    /**
+     * Anular inscripción de un equipo en el torneo
+     */
+    public function salir(Request $request, Torneo $torneo)
+    {
+        $user = Auth::user();
+
+        // Buscar la participación del equipo liderado por el usuario actual
+        $participacion = TorneoParticipacion::where('torneo_id', $torneo->id)
+            ->whereHas('equipo', function ($query) use ($user) {
+                $query->where('lider_id', $user->id);
+            })
+            ->first();
+
+        // VALIDACIÓN 1: Verificar que el equipo esté realmente inscrito
+        if (!$participacion) {
+            return back()->with('error', 'Tu equipo no está inscrito en este torneo.');
+        }
+        
+        // VALIDACIÓN 2: Solo se puede salir si las inscripciones están abiertas
+        if ($torneo->estado !== 'Inscripciones Abiertas') {
+            return back()->with('error', 'No puedes salir del torneo porque las inscripciones ya han cerrado o el torneo está en curso.');
+        }
+
+        // Eliminar participación
+        $participacion->delete();
+
+        // Decrementar contador de participantes
+        $torneo->decrement('participantes_actuales');
+
+        return back()->with('success', 'Has anulado la inscripción de tu equipo exitosamente.');
     }
 
     /**

@@ -172,20 +172,27 @@
             <!-- Inscripción -->
             <div class="card">
                 <h2 class="text-xl font-semibold text-universo-text mb-4">Inscripción</h2>
-                
-                @php
-                    $yaInscrito = $torneo->participaciones()
-                        ->whereHas('equipo', function($q) {
-                            $q->where('lider_id', auth()->id());
-                        })->exists();
-                @endphp
 
-                @if($yaInscrito)
-                    <div class="p-4 bg-green-500/10 border border-green-500 rounded-lg text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <p class="text-green-500 font-semibold mb-1">¡Ya estás inscrito!</p>
-                        <p class="text-sm text-universo-text-muted">Tienes un equipo participando en este torneo</p>
+                {{-- Si el usuario ya tiene un equipo inscrito --}}
+                @if($equipoInscrito)
+                    <div class="p-4 bg-universo-dark border border-cyan-500 rounded-lg text-center">
+                        <p class="text-universo-text-muted mb-2">Equipo inscrito:</p>
+                        <p class="text-xl font-bold text-cyan-400 mb-4">{{ $equipoInscrito->name }}</p>
+                        
+                        @if($torneo->estado == 'Inscripciones Abiertas')
+                            <form action="{{ route('torneos.salir', $torneo) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres anular la inscripción de tu equipo?');">
+                                @csrf
+                                <button type="submit" class="w-full btn-danger">
+                                    Anular Inscripción
+                                </button>
+                            </form>
+                            <p class="text-xs text-universo-text-muted mt-3">Puedes anular la inscripción mientras el periodo de registro esté abierto.</p>
+                        @else
+                             <p class="text-sm text-universo-text-muted">Ya no puedes anular la inscripción porque el torneo no está en periodo de registro.</p>
+                        @endif
                     </div>
+
+                {{-- Si el periodo de inscripciones está abierto --}}
                 @elseif($torneo->estado === 'Inscripciones Abiertas')
                     @if($torneo->max_participantes && $torneo->participantes_actuales >= $torneo->max_participantes)
                         <div class="text-center py-6">
@@ -225,6 +232,8 @@
                             <a href="{{ route('equipos.create') }}" class="btn-secondary">Crear Equipo</a>
                         </div>
                     @endif
+
+                {{-- Si el torneo no está en inscripciones --}}
                 @elseif($torneo->estado === 'Próximo')
                     <div class="text-center py-6">
                         <p class="text-universo-text-muted">Las inscripciones abrirán el {{ $torneo->fecha_registro_inicio->format('d/m/Y') }}</p>
