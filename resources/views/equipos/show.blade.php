@@ -5,10 +5,9 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
 
-    <!-- Header Card con diseño horizontal compacto -->
     <div class="card">
         <div class="flex flex-col lg:flex-row items-start justify-between gap-4">
-            <!-- Info Principal -->
+            
             <div class="flex items-start gap-3 flex-1">
                 <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-universo-purple to-universo-blue flex items-center justify-center text-white font-bold text-lg shadow-lg flex-shrink-0">
                     {{ substr($equipo->name, 0, 1) }}
@@ -25,7 +24,7 @@
                         @endif
                     </div>
                     
-                    <!-- Tecnologías inline -->
+                    <!-- Tecnologías para mostrar -->
                     @if($equipo->tecnologias)
                         <div class="mt-2 flex flex-wrap gap-2">
                             @foreach($equipo->tecnologias as $tech)
@@ -36,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Stats Horizontal compacto -->
             <div class="flex gap-3 lg:flex-shrink-0">
                 <div class="text-center">
                     <div class="text-2xl font-bold text-universo-purple">{{ $equipo->miembros_actuales }}/{{ $equipo->max_miembros }}</div>
@@ -62,12 +60,10 @@
         </div>
     </div>
 
-    <!-- Layout invertido: Sidebar primero en móvil -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Sidebar - aparece primero en móvil -->
         <div class="space-y-6 lg:order-2">
-            <!-- Líder Card -->
+        
             <div class="card">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="p-2 rounded-lg bg-universo-warning/20">
@@ -93,7 +89,7 @@
                 </div>
             </div>
 
-            <!-- Unirse al Equipo -->
+           <!-- Unirse al Equipo -->
             @if(!$esMiembro && $equipo->acepta_miembros && $equipo->miembros_actuales < $equipo->max_miembros)
                 <div class="card bg-gradient-to-br from-universo-success/10 to-transparent border-universo-success/20">
                     <div class="text-center mb-4">
@@ -112,13 +108,19 @@
                     <form action="{{ route('equipos.unirse', $equipo) }}" method="POST" class="space-y-3">
                         @csrf
                         <div>
-                            <label for="rol_equipo" class="block text-xs font-medium text-universo-text mb-1 uppercase tracking-wide">Tu Rol</label>
-                            <input type="text" 
-                                   name="rol_equipo" 
-                                   id="rol_equipo" 
-                                   placeholder="Ej: Desarrollador Frontend" 
-                                   class="input-field" 
-                                   required>
+                            <label for="rol_equipo" class="block text-xs font-medium text-universo-text mb-1 uppercase tracking-wide">
+                                Selecciona tu Rol
+                            </label>
+                            <select 
+                                name="rol_equipo" 
+                                id="rol_equipo" 
+                                class="input-field" 
+                                required>
+                                <option value="" disabled selected>Elige un rol...</option>
+                                @foreach($rolesDisponibles as $rol)
+                                    <option value="{{ $rol }}">{{ $rol }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <button type="submit" class="w-full btn-primary">Unirse al Equipo</button>
                     </form>
@@ -154,7 +156,6 @@
                     <p class="text-sm text-universo-text-muted">Equipo completo</p>
                 </div>
             @endif
-
             <!-- Compartir -->
             <div class="card">
                 <h3 class="text-sm font-semibold text-universo-text mb-3 uppercase tracking-wide">Compartir</h3>
