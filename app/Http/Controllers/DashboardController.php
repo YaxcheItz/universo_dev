@@ -5,67 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Proyecto;
 use App\Models\Torneo;
 use App\Models\User;
+use App\Models\Equipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
-    {/*
-        $user = Auth::user();
-
-        // Estadísticas del usuario
+    {
+        // Estadísticas Globales
         $estadisticas = [
-            'proyectos_totales' => $user->proyectosCreados()->count(),
-            'equipos_totales' => $user->equipos()->count(),
-            'torneos_participados' => $user->equipos()
-                ->with('torneoParticipaciones')
-                ->get()
-                ->pluck('torneoParticipaciones')
-                ->flatten()
-                ->count(),
-            'reconocimientos_totales' => $user->reconocimientos()->count(),
+            'proyectos_totales' => Proyecto::count(),
+            'torneos_totales' => Torneo::count(),
+            'equipos_totales' => Equipo::count(),
+            'usuarios_totales' => User::count(),
         ];
 
-        // Proyectos trending
-        $proyectosTrending = Proyecto::trending()
-            ->publico()
-            ->orderBy('estrellas', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Torneos activos
-        $torneosActivos = Torneo::activos()
-            ->publicos()
+        // Torneos activos para mostrar en el dashboard
+        $torneosActivos = Torneo::where('estado', 'Inscripciones Abiertas')
+            ->orWhere('estado', 'En Curso')
             ->orderBy('fecha_inicio', 'asc')
-            ->limit(3)
-            ->get();
-
-        // Actividad reciente (últimos proyectos del usuario)
-        $actividadReciente = $user->proyectosCreados()
-            ->orderBy('updated_at', 'desc')
             ->limit(5)
-            ->get();
-
-        // Equipos del usuario
-        $equipos = $user->equipos()
-            ->where('estado', 'Activo')
-            ->limit(3)
             ->get();
 
         return view('dashboard.index', compact(
             'estadisticas',
-            'proyectosTrending',
-            'torneosActivos',
-            'actividadReciente',
-            'equipos'
+            'torneosActivos'
         ));
-    }*/
-     return view('dashboard.index', [
-        'estadisticas' => [],
-        'proyectosTrending' => [],
-        'torneosActivos' => [],
-    ]);
-        
-}
+    }
 }
