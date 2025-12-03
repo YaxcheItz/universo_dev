@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 
 class Proyecto extends Model
 {
@@ -45,11 +44,6 @@ class Proyecto extends Model
         'forks' => 'integer',
         'contribuidores' => 'integer',
         'commits' => 'integer',
-    ];
-
-    protected $appends = [
-        'promedio_valoracion',
-        'total_valoraciones',
     ];
 
     // ==================== RELACIONES ====================
@@ -120,10 +114,13 @@ class Proyecto extends Model
         return $query->where('lenguaje_principal', $lenguaje);
     }
 
-   public function valoraciones()
-{
-    return $this->hasMany(ProyectoValoracion::class);
-}
+    /**
+     * Proyectos más populares
+     */
+    public function scopePopulares($query)
+    {
+        return $query->orderBy('estrellas', 'desc');
+    }
 
     /**
      * Proyectos recientes
@@ -150,35 +147,4 @@ class Proyecto extends Model
     {
         return in_array($this->estado, ['En Desarrollo', 'Pruebas', 'Producción']);
     }
-
-    public function getPromedioValoracionAttribute()
-{
-    $promedio = $this->valoraciones()->avg('puntuacion');
-    return $promedio ? round($promedio, 1) : 0;
-}
-
-/**
- * Obtener el total de valoraciones
- */
-public function getTotalValoracionesAttribute()
-{
-    return $this->valoraciones()->count();
-}
-
-/**
- * Verificar si un usuario ya valoró este proyecto
- */
-public function yaValoradoPor($userId)
-{
-    return $this->valoraciones()->where('user_id', $userId)->exists();
-}
-
-/**
- * Obtener la valoración de un usuario específico
- */
-public function valoracionDeUsuario($userId)
-{
-    return $this->valoraciones()->where('user_id', $userId)->first();
-}
-
 }
