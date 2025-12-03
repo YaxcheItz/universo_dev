@@ -61,6 +61,8 @@
         </div>
 
         <!-- Botón Editar Perfil -->
+        <!-- MODIFICADO: Botón para editar perfil-->
+        <!-- Ruta: route('perfil.edit') -> PerfilController@edit() -> GET /perfil/edit -->
         <a href="{{ route('perfil.edit') }}" class="absolute top-6 right-6 btn-secondary btn-sm flex items-center gap-2 hover:scale-105 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit w-4 h-4">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

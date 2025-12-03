@@ -16,6 +16,7 @@
     @apply bg-universo-purple hover:bg-purple-600 text-white font-medium px-6 py-2.5 rounded-lg transition-all duration-200 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30;
   }
 
+  /* boton ediatar perfil */
   .btn-secondary {
     @apply bg-universo-secondary hover:bg-universo-border text-universo-text font-medium px-6 py-2.5 rounded-lg border border-universo-border transition-all duration-200;
   }
