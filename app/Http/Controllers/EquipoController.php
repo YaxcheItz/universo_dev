@@ -61,7 +61,12 @@ class EquipoController extends Controller
             'Otro'
         ];
 
-        return view('equipos.create', compact('rolesDisponibles'));
+        // Obtener usuarios disponibles (excluir jueces)
+        $usuarios = User::select('id', 'name', 'rol')
+            ->whereNotIn('rol', ['Juez'])
+            ->get();
+
+        return view('equipos.create', compact('rolesDisponibles', 'usuarios'));
     }
 
     /**

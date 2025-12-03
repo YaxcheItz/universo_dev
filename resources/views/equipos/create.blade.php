@@ -80,7 +80,7 @@
     // excluir  Lider de Equipo
     const roles = @json($rolesDisponibles ?? []).filter(r => r.toLowerCase() !== 'líder de equipo');
 
-    let users = @json(\App\Models\User::select('id','name','rol')->where('rol', '!=', 'Juez')->get());
+    let users = @json($usuarios ?? []);
     const loggedUserId = {{ auth()->id() }};
 
     // Quitar al usuario actual de la lista de disponibles
