@@ -32,6 +32,10 @@
     @apply bg-universo-secondary border border-universo-border rounded-xl p-6 transition-all duration-200 hover:border-universo-purple/50;
   }
 
+  .card-no-hover {
+    @apply bg-universo-secondary border border-universo-border rounded-xl p-6 transition-all duration-200;
+  }
+
   .input-field {
     @apply w-full bg-universo-dark border border-universo-border rounded-lg px-4 py-2.5 text-universo-text placeholder-universo-text-muted focus:outline-none focus:ring-2 focus:ring-universo-purple focus:border-transparent transition-all duration-200;
   }
