@@ -72,12 +72,44 @@
                 </div>
             @endif
 
+            </div>
         </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <div class="space-y-6 lg:order-2">
+        @if(Auth::id() === $equipo->lider_id && $solicitudesPendientes->isNotEmpty())
+            <div class="card bg-universo-dark border-universo-purple/20">
+                <h2 class="text-xl font-semibold text-universo-text mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-purple"><path d="M14 19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2 3h4a2 2 0 0 1 2 2v1l-1 2H9.5"></path></svg>
+                    Solicitudes de Ingreso
+                    <span class="badge badge-purple">{{ $solicitudesPendientes->count() }}</span>
+                </h2>
+        
+                <div class="space-y-4">
+                    @foreach($solicitudesPendientes as $solicitud)
+                        <div class="flex items-center justify-between p-4 bg-universo-bg rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-universo-cyan/20 flex items-center justify-center text-universo-cyan font-bold">
+                                    {{ substr($solicitud->usuario->name, 0, 1) }}
+                                </div>
+                                <p class="text-universo-text font-semibold">{{ $solicitud->usuario->name }} quiere unirse</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <form action="{{ route('solicitudes.aceptar', $solicitud) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn-primary text-sm px-4 py-2">Aceptar</button>
+                                </form>
+                                <form action="{{ route('solicitudes.rechazar', $solicitud) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn-secondary text-sm px-4 py-2">Rechazar</button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="space-y-6 lg:order-2">
         
             <div class="card">
                 <div class="flex items-center gap-3 mb-4">

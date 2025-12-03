@@ -214,9 +214,9 @@
                             </div>
 
                             <div>
-                                <label for="proyecto_id" class="block text-sm font-medium text-universo-text mb-2">Proyecto (Opcional)</label>
-                                <select name="proyecto_id" id="proyecto_id" class="input-field">
-                                    <option value="">Sin proyecto por ahora</option>
+                                <label for="proyecto_id" class="block text-sm font-medium text-universo-text mb-2">Proyecto *</label>
+                                <select name="proyecto_id" id="proyecto_id" required class="input-field">
+                                    <option value="">Selecciona un proyecto...</option>
                                     @foreach(auth()->user()->proyectosCreados as $proyecto)
                                         <option value="{{ $proyecto->id }}">{{ $proyecto->name }}</option>
                                     @endforeach
@@ -256,9 +256,9 @@
                     <h2 class="text-xl font-semibold text-universo-text">Participantes</h2>
                     <span class="badge badge-purple">{{ $torneo->participantes_actuales }}</span>
                 </div>
-                
+
                 @if($torneo->participaciones->count() > 0)
-                    <div class="space-y-2">
+                    <div class="space-y-2 mb-4">
                         @foreach($torneo->participaciones->take(5) as $participacion)
                             <div class="flex items-center gap-2 p-2 bg-universo-dark rounded">
                                 <div class="w-8 h-8 rounded-full bg-universo-purple/20 flex items-center justify-center">
@@ -267,13 +267,15 @@
                                 <span class="text-sm text-universo-text">{{ $participacion->equipo->name }}</span>
                             </div>
                         @endforeach
-                        
-                        @if($torneo->participaciones->count() > 5)
-                            <a href="{{ route('torneos.participantes', $torneo) }}" class="text-sm text-universo-purple hover:underline">Ver todos los participantes</a>
-                        @endif
                     </div>
+                    <a href="{{ route('torneos.participantes', $torneo) }}" class="w-full btn-secondary text-center block">
+                        Ver todos los participantes
+                    </a>
                 @else
-                    <p class="text-sm text-universo-text-muted text-center py-4">Aún no hay equipos inscritos</p>
+                    <p class="text-sm text-universo-text-muted text-center py-4 mb-4">Aún no hay equipos inscritos</p>
+                    <a href="{{ route('torneos.participantes', $torneo) }}" class="w-full btn-secondary text-center block">
+                        Ver sección de participantes
+                    </a>
                 @endif
             </div>
 

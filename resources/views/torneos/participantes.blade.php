@@ -110,6 +110,24 @@
                                 @if($participacion->proyecto)
                                     <a href="{{ route('proyectos.show', $participacion->proyecto) }}" class="btn-secondary text-sm">Ver Proyecto</a>
                                 @endif
+
+                                @if(
+                                    auth()->check() &&
+                                    !$userYaEnTorneo &&
+                                    $torneo->estado == 'Inscripciones Abiertas' &&
+                                    $participacion->equipo->acepta_miembros &&
+                                    $participacion->equipo->miembros_actuales < $participacion->equipo->max_miembros &&
+                                    !in_array($participacion->equipo->id, $userTeamIds) &&
+                                    !in_array($participacion->equipo->id, $userPendingRequestTeamIds)
+                                )
+                                    <form action="{{ route('equipos.solicitarUnirse', $participacion->equipo) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="torneo_id" value="{{ $torneo->id }}">
+                                        <button type="submit" class="btn-primary text-sm">Solicitar Unirse</button>
+                                    </form>
+                                @elseif(auth()->check() && $userYaEnTorneo && $torneo->estado == 'Inscripciones Abiertas')
+                                    <span class="text-xs text-universo-text-muted italic">Ya estás en un equipo</span>
+                                @endif
                             </div>
                         </div>
 
