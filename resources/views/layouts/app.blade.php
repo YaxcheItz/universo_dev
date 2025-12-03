@@ -27,15 +27,25 @@
                         <a href="{{ route('dashboard') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('dashboard') ? 'text-universo-purple' : '' }}">
                             Inicio
                         </a>
-                        <a href="{{ route('proyectos.index') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('proyectos') ? 'text-universo-purple' : '' }}">
+                        <a href="{{ route('proyectos.index') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('proyectos.*') ? 'text-universo-purple' : '' }}">
                             Proyectos
                         </a>
                         <a href="{{ route('torneos.index') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('torneos.*') ? 'text-universo-purple' : '' }}">
                             Torneos
                         </a>
+
+                        @if(auth()->user()->rol !== 'Juez')
                         <a href="{{ route('equipos.index') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('equipos.*') ? 'text-universo-purple' : '' }}">
                             Equipos
                         </a>
+                        @endif
+
+                        @if(auth()->user()->rol === 'Juez')
+                        <a href="{{ route('evaluaciones.index') }}" class="text-universo-text hover:text-white transition {{ request()->routeIs('evaluaciones.*') ? 'text-universo-purple' : '' }} flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            Evaluaciones
+                        </a>
+                        @endif
                     </div>
                 </div>
 

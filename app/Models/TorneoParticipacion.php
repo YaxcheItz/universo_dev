@@ -43,4 +43,9 @@ class TorneoParticipacion extends Model
     {
         return $this->belongsTo(Proyecto::class);
     }
+
+    public function evaluaciones()
+    {
+        return $this->hasMany(Evaluacion::class, 'torneo_participacion_id');
+    }
 }

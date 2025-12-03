@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torneo;
 use App\Models\Equipo;
 use App\Models\TorneoParticipacion;
+use App\Models\EquipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,38 +16,89 @@ class TorneoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Torneo::with('organizador')
-            ->publicos()
-            ->orderBy('fecha_inicio', 'desc');
+        // Base query
+        $query = Torneo::with('organizador')->publicos();
 
-        // Filtro por categoría
-        if ($request->filled('categoria')) {
-            $query->where('categoria', $request->categoria);
-        }
-
-        // Filtro por estado
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
-        }
-
-        // Filtro por nivel
-        if ($request->filled('nivel')) {
-            $query->where('nivel_dificultad', $request->nivel);
-        }
-
-        // Búsqueda por nombre
+        // Aplicar filtros si existen
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $torneos = $query->paginate(12);
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
 
-        // Opciones para filtros
-        $categorias = ['Frontend', 'Backend', 'Full-Stack', 'Mobile', 'DevOps', 'Data Science', 'Machine Learning', 'Game Development', 'Blockchain', 'IoT', 'Ciberseguridad'];
-        $estados = ['Próximo', 'Inscripciones Abiertas', 'En Curso', 'Evaluación', 'Finalizado'];
-        $niveles = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
+        if ($request->filled('nivel_dificultad')) {
+            $query->where('nivel_dificultad', $request->nivel_dificultad);
+        }
 
-        return view('torneos.index', compact('torneos', 'categorias', 'estados', 'niveles'));
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Si hay filtros activos, mostrar todos en una vista
+        $filtrosActivos = $request->hasAny(['search', 'categoria', 'nivel_dificultad', 'estado']);
+
+        if ($filtrosActivos) {
+            $torneosFiltrados = $query->orderBy('fecha_inicio', 'desc')->get();
+
+            // Estadísticas generales
+            $estadisticas = [
+                'total_activos' => Torneo::whereIn('estado', ['Inscripciones Abiertas', 'En Curso'])->count(),
+                'total_participantes' => Torneo::sum('participantes_actuales'),
+                'total_finalizados' => Torneo::where('estado', 'Finalizado')->count(),
+            ];
+
+            return view('torneos.index', compact('torneosFiltrados', 'estadisticas', 'filtrosActivos'));
+        }
+
+        // Obtener torneos agrupados por estado (vista normal)
+        $torneosInscripcionesAbiertas = Torneo::with('organizador')
+            ->publicos()
+            ->where('estado', 'Inscripciones Abiertas')
+            ->orderBy('fecha_registro_fin', 'asc')
+            ->get();
+
+        $torneosEnCurso = Torneo::with('organizador')
+            ->publicos()
+            ->where('estado', 'En Curso')
+            ->orderBy('fecha_fin', 'asc')
+            ->get();
+
+        $torneosProximos = Torneo::with('organizador')
+            ->publicos()
+            ->where('estado', 'Próximo')
+            ->orderBy('fecha_inicio', 'asc')
+            ->get();
+
+        $torneosEvaluacion = Torneo::with('organizador')
+            ->publicos()
+            ->where('estado', 'Evaluación')
+            ->orderBy('fecha_fin', 'desc')
+            ->get();
+
+        $torneosFinalizados = Torneo::with('organizador')
+            ->publicos()
+            ->where('estado', 'Finalizado')
+            ->orderBy('fecha_fin', 'desc')
+            ->limit(6)
+            ->get();
+
+        // Estadísticas generales
+        $estadisticas = [
+            'total_activos' => $torneosInscripcionesAbiertas->count() + $torneosEnCurso->count(),
+            'total_participantes' => Torneo::sum('participantes_actuales'),
+            'total_finalizados' => Torneo::where('estado', 'Finalizado')->count(),
+        ];
+
+        return view('torneos.index', compact(
+            'torneosInscripcionesAbiertas',
+            'torneosEnCurso',
+            'torneosProximos',
+            'torneosEvaluacion',
+            'torneosFinalizados',
+            'estadisticas'
+        ));
     }
 
     /**
@@ -100,6 +152,10 @@ class TorneoController extends Controller
         $validated['user_id'] = Auth::id();
         $validated['participantes_actuales'] = 0;
         $validated['es_publico'] = $request->input('es_publico', 0) == 1;
+
+        // Los torneos se crean siempre con estado "Inscripciones Abiertas"
+        // El comando actualiza el estado automáticamente según las fechas
+        $validated['estado'] = 'Inscripciones Abiertas';
 
         $torneo = Torneo::create($validated);
 
@@ -218,9 +274,14 @@ class TorneoController extends Controller
      */
     public function inscribir(Request $request, Torneo $torneo)
     {
+        // VALIDACIÓN 0: Los jueces no pueden inscribirse en torneos
+        if (Auth::user()->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden inscribirse en torneos. Tu rol es evaluar proyectos.');
+        }
+
         $request->validate([
             'equipo_id' => 'required|exists:equipos,id',
-            'proyecto_id' => 'nullable|exists:proyectos,id',
+            'proyecto_id' => 'required|exists:proyectos,id',
         ]);
 
         $equipo = Equipo::findOrFail($request->equipo_id);
@@ -319,6 +380,28 @@ class TorneoController extends Controller
             ->orderBy('posicion', 'asc')
             ->get();
 
-        return view('torneos.participantes', compact('torneo', 'participaciones'));
+        $user = Auth::user();
+
+        // Obtener IDs de equipos del usuario que están participando en ESTE torneo
+        $equiposDelUsuarioEnTorneo = $user->equipos()
+            ->whereHas('torneoParticipaciones', function($query) use ($torneo) {
+                $query->where('torneo_id', $torneo->id);
+            })
+            ->pluck('equipos.id')
+            ->toArray();
+
+        // Si el usuario ya está en un equipo del torneo, no puede solicitar unirse a otros
+        $userYaEnTorneo = count($equiposDelUsuarioEnTorneo) > 0;
+
+        // IDs de todos los equipos del usuario (para verificar si ya es miembro)
+        $userTeamIds = $user->equipos->pluck('id')->toArray();
+
+        // IDs de equipos donde el usuario tiene solicitudes pendientes
+        $userPendingRequestTeamIds = EquipoSolicitud::where('user_id', $user->id)
+            ->where('estado', 'pendiente')
+            ->pluck('equipo_id')
+            ->toArray();
+
+        return view('torneos.participantes', compact('torneo', 'participaciones', 'userTeamIds', 'userPendingRequestTeamIds', 'userYaEnTorneo'));
     }
 }

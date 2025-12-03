@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Equipo;
 use App\Models\User;
 use App\Models\EquipoMiembro;
+use App\Models\EquipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SolicitudMiembro;
@@ -52,6 +53,12 @@ class EquipoController extends Controller
      */
     public function create()
     {
+        // Los jueces no pueden crear equipos
+        if (Auth::user()->rol === 'Juez') {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Los jueces no pueden crear equipos. Tu rol es evaluar proyectos.');
+        }
+
         $rolesDisponibles = [
             'Programador Frontend',
             'Programador Backend',
@@ -67,7 +74,12 @@ class EquipoController extends Controller
             'Otro'
         ];
 
-        return view('equipos.create', compact('rolesDisponibles'));
+        // Obtener usuarios disponibles (excluir jueces)
+        $usuarios = User::select('id', 'name', 'rol')
+            ->whereNotIn('rol', ['Juez'])
+            ->get();
+
+        return view('equipos.create', compact('rolesDisponibles', 'usuarios'));
     }
 
     /**
@@ -75,8 +87,13 @@ class EquipoController extends Controller
      */
    public function store(Request $request)
     {
+        // Los jueces no pueden crear equipos
+        if (Auth::user()->rol === 'Juez') {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Los jueces no pueden crear equipos. Tu rol es evaluar proyectos.');
+        }
 
-    
+
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'descripcion' => 'nullable|string',
@@ -193,6 +210,15 @@ class EquipoController extends Controller
 
         // verificar si el usuario actual es miembro del equipo
         $esMiembro = $equipo->miembros->contains('id', Auth::id());
+        $solicitudesPendientes = collect(); // Inicializar como colección vacía
+
+        // Si el usuario actual es el líder del equipo, cargar las solicitudes pendientes
+        if (Auth::id() === $equipo->lider_id) {
+            $solicitudesPendientes = EquipoSolicitud::where('equipo_id', $equipo->id)
+                ->where('estado', 'pendiente')
+                ->with('usuario') // Cargar los datos del usuario que hizo la solicitud
+                ->get();
+        }
         
         // Roles disponibles para unirse al equipo
         $rolesDisponibles = [
@@ -210,7 +236,7 @@ class EquipoController extends Controller
             'Otro'
         ];
         
-        return view('equipos.show', compact('equipo', 'esMiembro', 'rolesDisponibles'));
+        return view('equipos.show', compact('equipo', 'esMiembro', 'rolesDisponibles', 'solicitudesPendientes'));
     }
 
     /**
@@ -412,6 +438,11 @@ class EquipoController extends Controller
      */
     public function unirse(Request $request, Equipo $equipo)
     {
+        // Los jueces no pueden unirse a equipos
+        if (Auth::user()->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden unirse a equipos. Tu rol es evaluar proyectos.');
+        }
+
         if (!$equipo->acepta_miembros) {
             return back()->with('error', 'Este equipo no está aceptando nuevos miembros');
         }
@@ -442,6 +473,74 @@ class EquipoController extends Controller
     }
 
     /**
+     * Enviar una solicitud para unirse a un equipo.
+     */
+    public function solicitarUnirse(Request $request, Equipo $equipo)
+    {
+        $user = Auth::user();
+
+        // Los jueces no pueden solicitar unirse a equipos
+        if ($user->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden unirse a equipos. Tu rol es evaluar proyectos.');
+        }
+
+        // Si viene de un contexto de torneo, validar que el usuario no esté en otro equipo del torneo
+        if ($request->filled('torneo_id')) {
+            $torneoId = $request->torneo_id;
+
+            // Verificar que el usuario no esté ya en un equipo participante de este torneo
+            $equiposDelUsuarioEnTorneo = $user->equipos()
+                ->whereHas('torneoParticipaciones', function($query) use ($torneoId) {
+                    $query->where('torneo_id', $torneoId);
+                })
+                ->exists();
+
+            if ($equiposDelUsuarioEnTorneo) {
+                return back()->with('error', 'Ya estás participando en este torneo con otro equipo. No puedes solicitar unirte a más equipos.');
+            }
+
+            // Verificar que el torneo tenga inscripciones abiertas
+            $torneo = \App\Models\Torneo::find($torneoId);
+            if ($torneo && $torneo->estado !== 'Inscripciones Abiertas') {
+                return back()->with('error', 'Las inscripciones para este torneo no están abiertas.');
+            }
+        }
+
+        // Validar que el equipo acepte miembros
+        if (!$equipo->acepta_miembros) {
+            return back()->with('error', 'Este equipo no está aceptando nuevos miembros actualmente.');
+        }
+
+        // Validar que el equipo no esté lleno
+        if ($equipo->miembros_actuales >= $equipo->max_miembros) {
+            return back()->with('error', 'Este equipo ya ha alcanzado su capacidad máxima de miembros.');
+        }
+
+        // Validar que el usuario no sea ya miembro del equipo
+        if ($equipo->miembros->contains($user->id)) {
+            return back()->with('error', 'Ya eres miembro de este equipo.');
+        }
+
+        // Validar que no exista ya una solicitud pendiente
+        $solicitudExistente = EquipoSolicitud::where('user_id', $user->id)
+            ->where('equipo_id', $equipo->id)
+            ->where('estado', 'pendiente')
+            ->exists();
+
+        if ($solicitudExistente) {
+            return back()->with('error', 'Ya has enviado una solicitud a este equipo. Por favor, espera a que el líder la revise.');
+        }
+
+        // Crear la solicitud
+        EquipoSolicitud::create([
+            'user_id' => $user->id,
+            'equipo_id' => $equipo->id,
+        ]);
+
+        return back()->with('success', 'Tu solicitud para unirte al equipo ha sido enviada.');
+    }
+
+    /**
      * Agregar miembro (solo líder)
      */
     public function agregarMiembro(Request $request, Equipo $equipo)
@@ -454,6 +553,12 @@ class EquipoController extends Controller
             'user_id' => 'required|exists:users,id',
             'rol_equipo' => 'required|string'
         ]);
+
+        // Verificar que el usuario a agregar no sea un juez
+        $userToAdd = User::find($validated['user_id']);
+        if ($userToAdd && $userToAdd->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden ser parte de equipos. Su rol es evaluar proyectos.');
+        }
 
         // No permitir agregar otro líder si ya existe uno
         if ($validated['rol_equipo'] === "Líder de Equipo") {
