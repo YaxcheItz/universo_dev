@@ -3,12 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Proyecto;
-use App\Models\Equipo;
-use App\Models\Torneo;
-use App\Models\EquipoMiembro;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,50 +12,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear el usuario principal de prueba y 9 más
-        $users = User::factory(9)->create();
-        $mainUser = User::factory()->create([
+        // Crear únicamente el usuario principal de prueba
+        User::factory()->create([
             'name' => 'Test',
             'apellido_paterno' => 'User',
             'email' => 'test@example.com',
         ]);
-        $users->push($mainUser);
 
-        // Crear 20 proyectos, asignándolos a usuarios aleatorios
-        Proyecto::factory(20)->recycle($users)->create();
+        // Crear 3 jueces para evaluación de torneos
+        User::factory()->create([
+            'name' => 'Juez 1',
+            'apellido_paterno' => 'Martinez',
+            'email' => 'juez1@test.com',
+            'rol' => 'Juez',
+        ]);
 
-        // Crear 5 torneos, asignándolos a usuarios aleatorios
-        Torneo::factory(5)->recycle($users)->create();
+        User::factory()->create([
+            'name' => 'Juez 2',
+            'apellido_paterno' => 'Gonzalez',
+            'email' => 'juez2@test.com',
+            'rol' => 'Juez',
+        ]);
 
-        // Crear 8 equipos
-        Equipo::factory(8)->recycle($users)->create()->each(function ($equipo) use ($users) {
-            // Añadir al líder como miembro
-            if (!EquipoMiembro::where('equipo_id', $equipo->id)->where('user_id', $equipo->lider_id)->exists()) {
-                EquipoMiembro::create([
-                    'equipo_id' => $equipo->id,
-                    'user_id' => $equipo->lider_id,
-                    'rol_equipo' => 'Líder de Equipo',
-                    'fecha_ingreso' => now(),
-                    'estado' => 'Activo',
-                ]);
-                $equipo->increment('miembros_actuales');
-            }
-
-            // Añadir entre 1 y 4 miembros adicionales
-            $miembrosAdicionales = $users->where('id', '!=', $equipo->lider_id)->random(rand(1, 4));
-            
-            foreach ($miembrosAdicionales as $miembro) {
-                 if ($equipo->miembros_actuales < $equipo->max_miembros) {
-                    EquipoMiembro::create([
-                        'equipo_id' => $equipo->id,
-                        'user_id' => $miembro->id,
-                        'rol_equipo' => 'Miembro',
-                        'fecha_ingreso' => now(),
-                        'estado' => 'Activo',
-                    ]);
-                    $equipo->increment('miembros_actuales');
-                }
-            }
-        });
+        User::factory()->create([
+            'name' => 'Juez 3',
+            'apellido_paterno' => 'Rodriguez',
+            'email' => 'juez3@test.com',
+            'rol' => 'Juez',
+        ]);
     }
 }

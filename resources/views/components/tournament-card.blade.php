@@ -29,13 +29,33 @@
             </div>
             <div class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-4 h-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                <span class="text-xs">{{ $torneo->participantes_actuales }}/{{ $torneo->max_participantes ?? '∞' }}</span>
+                @if($torneo->max_participantes)
+                    <span class="text-xs {{ $torneo->participantes_actuales >= $torneo->max_participantes ? 'text-red-400 font-bold' : '' }}">
+                        {{ $torneo->participantes_actuales }}/{{ $torneo->max_participantes }}
+                        @if($torneo->participantes_actuales >= $torneo->max_participantes)
+                            <span class="text-red-400">(Lleno)</span>
+                        @endif
+                    </span>
+                @else
+                    <span class="text-xs">{{ $torneo->participantes_actuales }} equipos</span>
+                @endif
             </div>
             <div class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target w-4 h-4"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
                 <span class="text-xs">{{ $torneo->nivel_dificultad }}</span>
             </div>
         </div>
-        <a href="{{ route('torneos.show', $torneo) }}" class="w-full btn-primary mt-4 block text-center">Ver Detalles</a>
+        <div class="flex gap-2">
+            <a href="{{ route('torneos.show', $torneo) }}" class="flex-1 btn-primary text-center">Ver Detalles</a>
+            @if(auth()->id() === $torneo->user_id)
+                <form action="{{ route('torneos.destroy', $torneo) }}" method="POST" onsubmit="return confirm('¿Estas seguro de eliminar este torneo?')" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn-secondary text-red-400 px-3" title="Eliminar torneo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
+                </form>
+            @endif
+        </div>
     </div>
 </div>

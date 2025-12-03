@@ -44,8 +44,8 @@ class RegisterController extends Controller
             'pais' => ['nullable', 'string', 'max:255'],
             
             // Información Profesional (requeridos)
-            'rol' => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:255'],
+            'rol' => ['required', 'string', 'in:Desarrollador,Team Leader,Product Manager,Designer,DevOps,QA Engineer,Data Scientist'],
+            'github_username' => ['nullable', 'string', 'max:255'],
             'linkedin_url' => ['nullable', 'url', 'max:255'],
             'portfolio_url' => ['nullable', 'url', 'max:255'],
             
