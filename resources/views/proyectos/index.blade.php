@@ -17,7 +17,7 @@
         </a>
     </div>
 
-    <!-- Search Bar -->
+    <!-- Barra de búsqueda -->
     <div class="mb-8">
         <form action="{{ route('proyectos.index') }}" method="GET" class="flex gap-4">
             <div class="relative flex-1">
@@ -27,7 +27,7 @@
                 <input 
                     type="text" 
                     name="search" 
-                    placeholder="Buscar por nombre o lenguaje..." 
+                    placeholder="Buscar por nombre, descripción o lenguaje..." 
                     class="input-field pl-10 w-full"
                     value="{{ request('search') }}"
                 >
@@ -55,8 +55,8 @@
         @forelse ($proyectos as $proyecto)
             <!-- Proyecto Card con click para editar -->
             <div 
-                class="card hover:border-universo-purple transition-all cursor-pointer group"
-                onclick="window.location.href='{{ route('proyectos.edit', $proyecto) }}'"
+                class="card-no-hover cursor-pointer group"
+                onclick="window.location.href='{{ Auth::check() && Auth::id() === $proyecto->user_id ? route('proyectos.edit', $proyecto) : route('proyectos.show', $proyecto) }}'"
             >
                 <!-- Header del Proyecto -->
                 <div class="flex items-start justify-between mb-3">
@@ -103,72 +103,16 @@
                         @endif
                     @endif
                 </div>
-
-                <!-- Valoración con Estrellas -->
+                <!-- Estrellas  -->
                 <div class="flex items-center gap-4 text-sm text-universo-text-muted border-t border-universo-border pt-3">
+                    <!-- Estrellas -->
                     <div class="flex items-center gap-1">
-                        @php
-                            $promedio = round($proyecto->promedio_valoracion * 2) / 2; // Redondear a .5
-                            $estrellas_llenas = floor($promedio);
-                            $media_estrella = ($promedio - $estrellas_llenas) >= 0.5;
-                            $estrellas_vacias = 5 - $estrellas_llenas - ($media_estrella ? 1 : 0);
-                        @endphp
-                        
-                        <!-- Estrellas llenas -->
-                        @for($i = 0; $i < $estrellas_llenas; $i++)
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                        @endfor
-                        
-                        <!-- Media estrella -->
-                        @if($media_estrella)
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
-                                <defs>
-                                    <linearGradient id="half-{{ $proyecto->id }}">
-                                        <stop offset="50%" stop-color="currentColor" />
-                                        <stop offset="50%" stop-color="transparent" />
-                                    </linearGradient>
-                                </defs>
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half-{{ $proyecto->id }})"></polygon>
-                            </svg>
-                        @endif
-                        
-                        <!-- Estrellas vacías -->
-                        @for($i = 0; $i < $estrellas_vacias; $i++)
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-text-muted">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                        @endfor
-                        
-                        <span class="ml-1 font-medium text-universo-text">
-                            {{ number_format($proyecto->promedio_valoracion, 1) }}
-                        </span>
-                        <span class="text-universo-text-muted">
-                            ({{ $proyecto->total_valoraciones }})
-                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span>{{ number_format($proyecto->estrellas) }}</span>
                     </div>
-                    
-                    <!-- Botón para valorar (solo si no es el creador y está autenticado) -->
-                    @auth
-                        @if(Auth::id() !== $proyecto->user_id)
-                            <button 
-                                onclick="event.stopPropagation(); abrirModalValoracion({{ $proyecto->id }}, '{{ $proyecto->name }}', {{ $proyecto->valoracionDeUsuario(Auth::id())?->puntuacion ?? 0 }})"
-                                class="ml-auto text-universo-purple hover:text-universo-purple/80 transition-colors"
-                                title="Valorar proyecto"
-                            >
-                                @if($proyecto->yaValoradoPor(Auth::id()))
-                                    Editar valoración
-                                @else
-                                    Valorar
-                                @endif
-                            </button>
-                        @endif
-                    @endauth
                 </div>
-
-                <!-- Hover Effect -->
-                <div class="absolute inset-0 border-2 border-transparent group-hover:border-universo-purple rounded-lg pointer-events-none transition-all"></div>
             </div>
         @empty
             <div class="md:col-span-2 lg:col-span-3 text-center py-12">
@@ -200,105 +144,9 @@
 
 </div>
 
-<!-- Modal de Valoración -->
-<div id="modal-valoracion" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="cerrarModalValoracion()">
-    <div class="bg-universo-card-bg border border-universo-border rounded-lg p-6 max-w-md w-full mx-4" onclick="event.stopPropagation()">
-        <h3 class="text-xl font-bold text-universo-text mb-4">Valorar Proyecto</h3>
-        <p class="text-universo-text-muted mb-4" id="modal-proyecto-nombre"></p>
-        
-        <form id="form-valoracion" method="POST" action="">
-            @csrf
-            <input type="hidden" name="proyecto_id" id="valoracion-proyecto-id">
-            
-            <!-- Estrellas para valorar -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-universo-text mb-2">Puntuación</label>
-                <div class="flex gap-2" id="estrellas-valoracion">
-                    @for($i = 1; $i <= 5; $i++)
-                        <button type="button" onclick="seleccionarEstrella({{ $i }})" class="estrella-btn" data-valor="{{ $i }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-text-muted hover:text-yellow-400 transition-colors">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                        </button>
-                    @endfor
-                </div>
-                <input type="hidden" name="puntuacion" id="puntuacion-input" required>
-            </div>
-            
-            <!-- Comentario opcional -->
-            <div class="mb-4">
-                <label for="comentario" class="block text-sm font-medium text-universo-text mb-2">Comentario (opcional)</label>
-                <textarea name="comentario" id="comentario" rows="3" class="input-field" placeholder="Comparte tu opinión sobre este proyecto..."></textarea>
-            </div>
-            
-            <div class="flex gap-3 justify-end">
-                <button type="button" onclick="cerrarModalValoracion()" class="btn-secondary">Cancelar</button>
-                <button type="submit" class="btn-primary">Enviar Valoración</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-let puntuacionSeleccionada = 0;
-
-function abrirModalValoracion(proyectoId, proyectoNombre, valoracionActual = 0) {
-    document.getElementById('modal-valoracion').classList.remove('hidden');
-    document.getElementById('modal-valoracion').classList.add('flex');
-    document.getElementById('modal-proyecto-nombre').textContent = proyectoNombre;
-    document.getElementById('valoracion-proyecto-id').value = proyectoId;
-    document.getElementById('form-valoracion').action = `/proyectos/${proyectoId}/valorar`;
-    
-    // Si ya tiene valoración, mostrarla
-    if (valoracionActual > 0) {
-        seleccionarEstrella(valoracionActual);
-    } else {
-        puntuacionSeleccionada = 0;
-        actualizarEstrellas();
-    }
-}
-
-function cerrarModalValoracion() {
-    document.getElementById('modal-valoracion').classList.add('hidden');
-    document.getElementById('modal-valoracion').classList.remove('flex');
-    puntuacionSeleccionada = 0;
-    document.getElementById('comentario').value = '';
-    actualizarEstrellas();
-}
-
-function seleccionarEstrella(valor) {
-    puntuacionSeleccionada = valor;
-    document.getElementById('puntuacion-input').value = valor;
-    actualizarEstrellas();
-}
-
-function actualizarEstrellas() {
-    const botones = document.querySelectorAll('.estrella-btn');
-    botones.forEach((boton, index) => {
-        const svg = boton.querySelector('svg');
-        if (index < puntuacionSeleccionada) {
-            svg.setAttribute('fill', 'currentColor');
-            svg.classList.remove('text-universo-text-muted');
-            svg.classList.add('text-yellow-400');
-        } else {
-            svg.setAttribute('fill', 'none');
-            svg.classList.add('text-universo-text-muted');
-            svg.classList.remove('text-yellow-400');
-        }
-    });
-}
-
-// Cerrar modal con ESC
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        cerrarModalValoracion();
-    }
-});
-</script>
-
 <!-- Nota visual para el usuario -->
 <div class="fixed bottom-4 right-4 bg-universo-card-bg border border-universo-border rounded-lg p-4 shadow-lg max-w-sm hidden" id="edit-hint">
-    <p class="text-sm text-universo-text mb-1">💡 <strong>Tip:</strong></p>
+    <p class="text-sm text-universo-text mb-1"> <strong>Tip:</strong></p>
     <p class="text-xs text-universo-text-muted">Haz click en cualquier proyecto para editarlo</p>
 </div>
 

@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\EquipoSolicitudController;
+use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +70,7 @@ Route::middleware('auth')->group(function () {
     
 
     // Rutas de Equipos
+    
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/create', [EquipoController::class, 'create'])->name('equipos.create');
     Route::post('/equipos', [EquipoController::class, 'store'])->name('equipos.store');
@@ -92,4 +95,26 @@ Route::middleware('auth')->group(function () {
     Route::delete('/equipos/solicitudes/{solicitud}/rechazar', [EquipoController::class, 'manejarSolicitud'])
         ->name('equipos.solicitudes.rechazar');
 
+
+    // Unirse, salir y manejar miembros
+    Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
+    Route::post('/equipos/{equipo}/salir', [EquipoController::class, 'salir'])->name('equipos.salir');
+    Route::post('/equipos/{equipo}/solicitar-unirse', [EquipoController::class, 'solicitarUnirse'])->name('equipos.solicitarUnirse');
+    Route::post('/equipos/{equipo}/agregar-miembro', [EquipoController::class, 'agregarMiembro'])->name('equipos.agregarMiembro');
+    Route::post('/equipos/{equipo}/remover/{user}', [EquipoController::class, 'removerMiembro'])->name('equipos.removerMiembro');
+    
+    // Solicitudes de Equipo
+    Route::post('/solicitudes/{equipoSolicitud}/aceptar', [EquipoSolicitudController::class, 'aceptar'])->name('solicitudes.aceptar');
+    Route::post('/solicitudes/{equipoSolicitud}/rechazar', [EquipoSolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
+    
+    // Perfil
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    // Evaluaciones (solo para Jueces)
+    Route::get('/evaluaciones', [EvaluacionController::class, 'index'])->name('evaluaciones.index');
+    Route::get('/evaluaciones/{torneo}', [EvaluacionController::class, 'show'])->name('evaluaciones.show');
+    Route::get('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'create'])->name('evaluaciones.create');
+    Route::post('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'store'])->name('evaluaciones.store');
 });

@@ -8,10 +8,21 @@ use Illuminate\Support\Facades\Auth;
 
 class ProyectoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener todos los proyectos para mostrar en la vista
-        $proyectos = Proyecto::with('creador')->paginate(9);
+        $query = Proyecto::with('creador');
+
+        // Si hay búsqueda, filtrar
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('descripcion', 'like', "%{$search}%")
+                  ->orWhere('lenguaje_principal', 'like', "%{$search}%");
+            });
+        }
+
+        $proyectos = $query->paginate(9);
 
         return view('proyectos.index', compact('proyectos'));
     }
