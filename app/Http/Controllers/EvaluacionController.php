@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torneo;
 use App\Models\TorneoParticipacion;
 use App\Models\Evaluacion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -142,6 +143,9 @@ class EvaluacionController extends Controller
         // Actualizar el puntaje total de la participación (promedio de todas las evaluaciones)
         $this->actualizarPuntajeParticipacion($participacion);
 
+        // Verificar si todos los jueces han evaluado todas las participaciones
+        $this->verificarFinalizacionTorneo($participacion->torneo);
+
         return redirect()->route('evaluaciones.show', $participacion->torneo)
             ->with('success', '¡Evaluación guardada exitosamente!');
     }
@@ -157,6 +161,40 @@ class EvaluacionController extends Controller
             $promedioTotal = $evaluaciones->avg('puntaje_total');
             $participacion->puntaje_total = $promedioTotal;
             $participacion->save();
+        }
+    }
+
+    /**
+     * Verificar si todos los jueces han evaluado todas las participaciones y finalizar el torneo
+     */
+    private function verificarFinalizacionTorneo(Torneo $torneo)
+    {
+        // Obtener total de jueces en el sistema
+        $totalJueces = User::where('rol', 'Juez')->count();
+
+        if ($totalJueces == 0) {
+            return; // No hay jueces, no se puede finalizar
+        }
+
+        // Obtener total de participaciones del torneo
+        $totalParticipaciones = $torneo->participaciones()->count();
+
+        if ($totalParticipaciones == 0) {
+            return; // No hay participaciones, no se puede finalizar
+        }
+
+        // Total de evaluaciones que deberían existir (jueces * participaciones)
+        $evaluacionesEsperadas = $totalJueces * $totalParticipaciones;
+
+        // Total de evaluaciones actuales del torneo
+        $evaluacionesActuales = Evaluacion::whereIn('torneo_participacion_id',
+            $torneo->participaciones()->pluck('id')
+        )->count();
+
+        // Si todas las evaluaciones están completas, finalizar el torneo
+        if ($evaluacionesActuales >= $evaluacionesEsperadas) {
+            $torneo->estado = 'Finalizado';
+            $torneo->save();
         }
     }
 }
