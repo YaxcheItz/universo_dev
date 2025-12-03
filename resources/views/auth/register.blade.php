@@ -110,12 +110,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-universo-text mb-2">Rol o Profesión *</label>
-                            <input name="rol" type="text" required class="input-field" value="{{ old('rol') }}">
-
+                            <select name="rol" required class="input-field">
+                                <option value="">Selecciona tu rol</option>
+                                <option value="Desarrollador" {{ old('rol') == 'Desarrollador' ? 'selected' : '' }}>Desarrollador</option>
+                                <option value="Team Leader" {{ old('rol') == 'Team Leader' ? 'selected' : '' }}>Team Leader</option>
+                                <option value="Product Manager" {{ old('rol') == 'Product Manager' ? 'selected' : '' }}>Product Manager</option>
+                                <option value="Designer" {{ old('rol') == 'Designer' ? 'selected' : '' }}>Designer</option>
+                                <option value="DevOps" {{ old('rol') == 'DevOps' ? 'selected' : '' }}>DevOps</option>
+                                <option value="QA Engineer" {{ old('rol') == 'QA Engineer' ? 'selected' : '' }}>QA Engineer</option>
+                                <option value="Data Scientist" {{ old('rol') == 'Data Scientist' ? 'selected' : '' }}>Data Scientist</option>
+                            </select>
+                            @error('rol')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-universo-text mb-2">Nombre de Usuario</label>
-                            <input name="username" type="text" class="input-field" value="{{ old('username') }}">
+                            <label class="block text-sm font-medium text-universo-text mb-2">Usuario de GitHub</label>
+                            <input name="github_username" type="text" class="input-field" value="{{ old('github_username') }}" placeholder="tu-usuario">
                         </div>
                     </div>
                 </div>

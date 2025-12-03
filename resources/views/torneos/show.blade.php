@@ -4,6 +4,21 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
+    <!-- Mensajes de éxito y error -->
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-green-500/10 border border-green-500 rounded-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500 flex-shrink-0"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <p class="text-green-500 font-medium">{{ session('success') }}</p>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>
+            <p class="text-red-500 font-medium">{{ session('error') }}</p>
+        </div>
+    @endif
+
     <!-- Header con Banner -->
     <div class="card mb-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -155,11 +170,38 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Inscripción -->
+            @if(auth()->user()->rol !== 'Juez')
             <div class="card">
                 <h2 class="text-xl font-semibold text-universo-text mb-4">Inscripción</h2>
-                
-                @if($torneo->estado === 'Inscripciones Abiertas')
-                    @if($equiposDisponibles->count() > 0)
+
+                {{-- Si el usuario ya tiene un equipo inscrito --}}
+                @if($equipoInscrito)
+                    <div class="p-4 bg-universo-dark border border-cyan-500 rounded-lg text-center">
+                        <p class="text-universo-text-muted mb-2">Equipo inscrito:</p>
+                        <p class="text-xl font-bold text-cyan-400 mb-4">{{ $equipoInscrito->name }}</p>
+                        
+                        @if($torneo->estado == 'Inscripciones Abiertas')
+                            <form action="{{ route('torneos.salir', $torneo) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres anular la inscripción de tu equipo?');">
+                                @csrf
+                                <button type="submit" class="w-full btn-danger">
+                                    Anular Inscripción
+                                </button>
+                            </form>
+                            <p class="text-xs text-universo-text-muted mt-3">Puedes anular la inscripción mientras el periodo de registro esté abierto.</p>
+                        @else
+                             <p class="text-sm text-universo-text-muted">Ya no puedes anular la inscripción porque el torneo no está en periodo de registro.</p>
+                        @endif
+                    </div>
+
+                {{-- Si el periodo de inscripciones está abierto --}}
+                @elseif($torneo->estado === 'Inscripciones Abiertas')
+                    @if($torneo->max_participantes && $torneo->participantes_actuales >= $torneo->max_participantes)
+                        <div class="text-center py-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-400"><circle cx="12" cy="12" r="10"></circle><line x1="15" x2="9" y1="9" y2="15"></line><line x1="9" x2="15" y1="9" y2="15"></line></svg>
+                            <p class="text-red-400 font-semibold mb-1">Torneo Lleno</p>
+                            <p class="text-universo-text-muted">Este torneo ha alcanzado el máximo de {{ $torneo->max_participantes }} equipos</p>
+                        </div>
+                    @elseif($equiposDisponibles->count() > 0)
                         <form action="{{ route('torneos.inscribir', $torneo) }}" method="POST" class="space-y-4">
                             @csrf
                             <div>
@@ -173,9 +215,9 @@
                             </div>
 
                             <div>
-                                <label for="proyecto_id" class="block text-sm font-medium text-universo-text mb-2">Proyecto (Opcional)</label>
-                                <select name="proyecto_id" id="proyecto_id" class="input-field">
-                                    <option value="">Sin proyecto por ahora</option>
+                                <label for="proyecto_id" class="block text-sm font-medium text-universo-text mb-2">Proyecto *</label>
+                                <select name="proyecto_id" id="proyecto_id" required class="input-field">
+                                    <option value="">Selecciona un proyecto...</option>
                                     @foreach(auth()->user()->proyectosCreados as $proyecto)
                                         <option value="{{ $proyecto->id }}">{{ $proyecto->name }}</option>
                                     @endforeach
@@ -191,6 +233,8 @@
                             <a href="{{ route('equipos.create') }}" class="btn-secondary">Crear Equipo</a>
                         </div>
                     @endif
+
+                {{-- Si el torneo no está en inscripciones --}}
                 @elseif($torneo->estado === 'Próximo')
                     <div class="text-center py-6">
                         <p class="text-universo-text-muted">Las inscripciones abrirán el {{ $torneo->fecha_registro_inicio->format('d/m/Y') }}</p>
@@ -206,6 +250,7 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             <!-- Participantes -->
             <div class="card">
@@ -213,9 +258,9 @@
                     <h2 class="text-xl font-semibold text-universo-text">Participantes</h2>
                     <span class="badge badge-purple">{{ $torneo->participantes_actuales }}</span>
                 </div>
-                
+
                 @if($torneo->participaciones->count() > 0)
-                    <div class="space-y-2">
+                    <div class="space-y-2 mb-4">
                         @foreach($torneo->participaciones->take(5) as $participacion)
                             <div class="flex items-center gap-2 p-2 bg-universo-dark rounded">
                                 <div class="w-8 h-8 rounded-full bg-universo-purple/20 flex items-center justify-center">
@@ -224,13 +269,15 @@
                                 <span class="text-sm text-universo-text">{{ $participacion->equipo->name }}</span>
                             </div>
                         @endforeach
-                        
-                        @if($torneo->participaciones->count() > 5)
-                            <a href="{{ route('torneos.participantes', $torneo) }}" class="text-sm text-universo-purple hover:underline">Ver todos los participantes</a>
-                        @endif
                     </div>
+                    <a href="{{ route('torneos.participantes', $torneo) }}" class="w-full btn-secondary text-center block">
+                        Ver todos los participantes
+                    </a>
                 @else
-                    <p class="text-sm text-universo-text-muted text-center py-4">Aún no hay equipos inscritos</p>
+                    <p class="text-sm text-universo-text-muted text-center py-4 mb-4">Aún no hay equipos inscritos</p>
+                    <a href="{{ route('torneos.participantes', $torneo) }}" class="w-full btn-secondary text-center block">
+                        Ver sección de participantes
+                    </a>
                 @endif
             </div>
 
@@ -252,20 +299,13 @@
 function copiarEnlace() {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-        alert('¡Enlace copiado al portapapeles!');
+        // Crear notificación visual en lugar de alert
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        notification.textContent = '¡Enlace copiado al portapapeles!';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
     });
 }
 </script>
-
-@if(session('success'))
-<script>
-    alert('{{ session('success') }}');
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    alert('{{ session('error') }}');
-</script>
-@endif
 @endsection

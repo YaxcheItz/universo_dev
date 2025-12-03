@@ -29,8 +29,8 @@
             <label for="acepta" class="sr-only">Acepta miembros</label>
             <select name="acepta_miembros" id="acepta" class="input-field">
                 <option value="">Filtros</option>
-                <option value="1" @selected(request('acepta_miembros') == '1')>Sí</option>
-                <option value="0" @selected(request('acepta_miembros') == '0')>No</option>
+                <option value="1" @selected(request('acepta_miembros') == '1')>Sí Acepta Miembros</option>
+                <option value="0" @selected(request('acepta_miembros') == '0')>No Acepta Miembros</option>
             </select>
         </div>
 
