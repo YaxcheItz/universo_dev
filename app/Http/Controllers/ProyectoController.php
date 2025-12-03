@@ -5,35 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Proyecto;
 use Illuminate\Support\Facades\Auth;
-use App\Models\ProyectoValoracion;
 
 class ProyectoController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-    $search = $request->input('search');
-    
-    $query = Proyecto::with(['creador', 'valoraciones']);
-    
-    // Aplicar búsqueda si existe
-    if ($search) {
-        $query->where(function ($q) use ($search) {
-            // Buscar por nombre del proyecto
-            $q->where('name', 'like', '%' . $search . '%')
-              // Buscar por lenguaje principal
-              ->orWhere('lenguaje_principal', 'like', '%' . $search . '%')
-              // Buscar por nombre del creador
-              ->orWhereHas('creador', function ($q) use ($search) {
-                  $q->where('name', 'like', '%' . $search . '%');
-              });
-        });
-    }
         // Obtener todos los proyectos para mostrar en la vista
-        $proyectos = $query->paginate(9);
+        $proyectos = Proyecto::with('creador')->paginate(9);
 
         return view('proyectos.index', compact('proyectos'));
-
-        
     }
 
     public function create()
@@ -103,41 +83,4 @@ class ProyectoController extends Controller
         return redirect()->route('proyectos.index')
             ->with('success', 'Proyecto eliminado exitosamente');
     }
-
-  public function valorar(Request $request, Proyecto $proyecto)
-{
-    // Verificar que el usuario esté autenticado
-    if (!Auth::check()) {
-        return back()->with('error', 'Debes iniciar sesión para valorar proyectos');
-    }
-
-    // No puedes valorar tu propio proyecto
-    if ($proyecto->user_id === Auth::id()) {
-        return back()->with('error', 'No puedes valorar tu propio proyecto');
-    }
-
-    // Validar la entrada
-    $validated = $request->validate([
-        'puntuacion' => 'required|integer|min:1|max:5',
-        'comentario' => 'nullable|string|max:500',
-    ]);
-
-    // IMPORTANTE: Agregar explícitamente el user_id
-    $validated['user_id'] = Auth::id();
-    $validated['proyecto_id'] = $proyecto->id;
-
-    // Crear o actualizar la valoración
-    ProyectoValoracion::updateOrCreate(
-        [
-            'proyecto_id' => $proyecto->id,
-            'user_id' => Auth::id(),
-        ],
-        [
-            'puntuacion' => $validated['puntuacion'],
-            'comentario' => $validated['comentario'] ?? null,
-        ]
-    );
-
-    return back()->with('success', 'Valoración guardada exitosamente');
-}
 }
