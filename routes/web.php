@@ -7,6 +7,7 @@ use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\EquipoSolicitudController;
+use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PerfilController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -78,4 +79,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
     Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    // Evaluaciones (solo para Jueces)
+    Route::get('/evaluaciones', [EvaluacionController::class, 'index'])->name('evaluaciones.index');
+    Route::get('/evaluaciones/{torneo}', [EvaluacionController::class, 'show'])->name('evaluaciones.show');
+    Route::get('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'create'])->name('evaluaciones.create');
+    Route::post('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'store'])->name('evaluaciones.store');
 });
