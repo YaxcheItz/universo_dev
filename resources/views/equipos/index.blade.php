@@ -38,6 +38,39 @@
             <button type="submit" class="btn-primary">Filtrar</button>
         </div>
     </form>
+    @if($solicitudesPendientes->count() > 0)
+        <div class="card bg-universo-warning/10 border-universo-warning/20 mb-6">
+            <h2 class="text-universo-text font-semibold mb-2">Solicitudes Pendientes</h2>
+            <div class="space-y-2">
+                @foreach($solicitudesPendientes as $solicitud)
+                <div class="flex justify-between items-center p-2 bg-universo-dark/10 rounded">
+                    <div>
+                        <p class="text-sm text-universo-text">
+                            {{ $solicitud->user->nombre_completo }} desea unirse a <strong>{{ $solicitud->equipo->name }}</strong> como <em>{{ $solicitud->rol_equipo }}</em>
+                        </p>
+                    </div>
+                    <div class="flex gap-2">
+                       <form action="{{ route('equipos.solicitudes.aceptar', $solicitud) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="accion" value="Aceptar">
+                            <button type="submit" class="btn-success btn-sm">Aceptar</button>
+                        </form>
+
+                        <form action="{{ route('equipos.solicitudes.rechazar', $solicitud) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="accion" value="Rechazar">
+                            <button type="submit" class="btn-danger btn-sm">Rechazar</button>
+                        </form>
+
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+
 
     <!--Listado -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

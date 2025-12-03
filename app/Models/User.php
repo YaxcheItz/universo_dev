@@ -66,6 +66,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Equipo::class, 'lider_id');
     }
+    public function esLiderDeAlguno(): bool
+    {
+        return $this->equiposLiderados()->exists();
+    }
 
     /**
      * Equipos a los que pertenece el usuario (como miembro)
