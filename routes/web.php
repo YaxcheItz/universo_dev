@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\ProyectoValoracionController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\PerfilController;
@@ -39,6 +40,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/proyectos', [ProyectoController::class, 'store'])->name('proyectos.store');
     Route::get('/proyectos/{proyecto}', [ProyectoController::class, 'show'])->name('proyectos.show');
     Route::get('/proyectos/{proyecto}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
+    Route::post('/proyectos/{proyecto}/valorar', [ProyectoValoracionController::class, 'store'])->name('proyectos.valorar');
+    Route::delete('/proyectos/{proyecto}/valoracion', [ProyectoValoracionController::class, 'destroy'])->name('proyectos.valoracion.destroy');
+    Route::get('/proyectos/{proyecto}/valoraciones', [ProyectoValoracionController::class, 'index'])->name('proyectos.valoraciones.index');
+    Route::get('/proyectos/{proyecto}/mi-valoracion', [ProyectoValoracionController::class, 'show'])->name('proyectos.valoracion.show');
     Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->name('proyectos.update');
     Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
     
