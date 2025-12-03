@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\EquipoSolicitudController;
 use App\Http\Controllers\PerfilController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -65,8 +66,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
     Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
     Route::post('/equipos/{equipo}/salir', [EquipoController::class, 'salir'])->name('equipos.salir');
+    Route::post('/equipos/{equipo}/solicitar-unirse', [EquipoController::class, 'solicitarUnirse'])->name('equipos.solicitarUnirse');
     Route::post('/equipos/{equipo}/agregar-miembro', [EquipoController::class, 'agregarMiembro'])->name('equipos.agregarMiembro');
-    Route::delete('/equipos/{equipo}/remover/{user}', [EquipoController::class, 'removerMiembro'])->name('equipos.removerMiembro');
+    Route::post('/equipos/{equipo}/remover/{user}', [EquipoController::class, 'removerMiembro'])->name('equipos.removerMiembro');
+    
+    // Solicitudes de Equipo
+    Route::post('/solicitudes/{equipoSolicitud}/aceptar', [EquipoSolicitudController::class, 'aceptar'])->name('solicitudes.aceptar');
+    Route::post('/solicitudes/{equipoSolicitud}/rechazar', [EquipoSolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
     
     // Perfil
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Torneo;
 use App\Models\Equipo;
 use App\Models\TorneoParticipacion;
+use App\Models\EquipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -220,7 +221,7 @@ class TorneoController extends Controller
     {
         $request->validate([
             'equipo_id' => 'required|exists:equipos,id',
-            'proyecto_id' => 'nullable|exists:proyectos,id',
+            'proyecto_id' => 'required|exists:proyectos,id',
         ]);
 
         $equipo = Equipo::findOrFail($request->equipo_id);
@@ -319,6 +320,28 @@ class TorneoController extends Controller
             ->orderBy('posicion', 'asc')
             ->get();
 
-        return view('torneos.participantes', compact('torneo', 'participaciones'));
+        $user = Auth::user();
+
+        // Obtener IDs de equipos del usuario que están participando en ESTE torneo
+        $equiposDelUsuarioEnTorneo = $user->equipos()
+            ->whereHas('torneoParticipaciones', function($query) use ($torneo) {
+                $query->where('torneo_id', $torneo->id);
+            })
+            ->pluck('equipos.id')
+            ->toArray();
+
+        // Si el usuario ya está en un equipo del torneo, no puede solicitar unirse a otros
+        $userYaEnTorneo = count($equiposDelUsuarioEnTorneo) > 0;
+
+        // IDs de todos los equipos del usuario (para verificar si ya es miembro)
+        $userTeamIds = $user->equipos->pluck('id')->toArray();
+
+        // IDs de equipos donde el usuario tiene solicitudes pendientes
+        $userPendingRequestTeamIds = EquipoSolicitud::where('user_id', $user->id)
+            ->where('estado', 'pendiente')
+            ->pluck('equipo_id')
+            ->toArray();
+
+        return view('torneos.participantes', compact('torneo', 'participaciones', 'userTeamIds', 'userPendingRequestTeamIds', 'userYaEnTorneo'));
     }
 }
