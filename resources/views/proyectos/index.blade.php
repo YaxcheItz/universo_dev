@@ -56,7 +56,7 @@
             <!-- Proyecto Card con click para editar -->
             <div 
                 class="card-no-hover cursor-pointer group"
-                onclick="window.location.href='{{ route('proyectos.edit', $proyecto) }}'"
+                onclick="window.location.href='{{ Auth::check() && Auth::id() === $proyecto->user_id ? route('proyectos.edit', $proyecto) : route('proyectos.show', $proyecto) }}'"
             >
                 <!-- Header del Proyecto -->
                 <div class="flex items-start justify-between mb-3">
