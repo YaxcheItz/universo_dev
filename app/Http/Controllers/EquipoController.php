@@ -39,6 +39,12 @@ class EquipoController extends Controller
      */
     public function create()
     {
+        // Los jueces no pueden crear equipos
+        if (Auth::user()->rol === 'Juez') {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Los jueces no pueden crear equipos. Tu rol es evaluar proyectos.');
+        }
+
         $rolesDisponibles = [
             'Líder de Equipo',
             'Programador Frontend',
@@ -63,8 +69,13 @@ class EquipoController extends Controller
      */
    public function store(Request $request)
     {
+        // Los jueces no pueden crear equipos
+        if (Auth::user()->rol === 'Juez') {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Los jueces no pueden crear equipos. Tu rol es evaluar proyectos.');
+        }
 
-    
+
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'descripcion' => 'nullable|string',
@@ -343,6 +354,11 @@ class EquipoController extends Controller
      */
     public function unirse(Request $request, Equipo $equipo)
     {
+        // Los jueces no pueden unirse a equipos
+        if (Auth::user()->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden unirse a equipos. Tu rol es evaluar proyectos.');
+        }
+
         if (!$equipo->acepta_miembros) {
             return back()->with('error', 'Este equipo no está aceptando nuevos miembros');
         }
@@ -378,6 +394,11 @@ class EquipoController extends Controller
     public function solicitarUnirse(Request $request, Equipo $equipo)
     {
         $user = Auth::user();
+
+        // Los jueces no pueden solicitar unirse a equipos
+        if ($user->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden unirse a equipos. Tu rol es evaluar proyectos.');
+        }
 
         // Si viene de un contexto de torneo, validar que el usuario no esté en otro equipo del torneo
         if ($request->filled('torneo_id')) {
@@ -448,6 +469,12 @@ class EquipoController extends Controller
             'user_id' => 'required|exists:users,id',
             'rol_equipo' => 'required|string'
         ]);
+
+        // Verificar que el usuario a agregar no sea un juez
+        $userToAdd = User::find($validated['user_id']);
+        if ($userToAdd && $userToAdd->rol === 'Juez') {
+            return back()->with('error', 'Los jueces no pueden ser parte de equipos. Su rol es evaluar proyectos.');
+        }
 
         // No permitir agregar otro líder si ya existe uno
         if ($validated['rol_equipo'] === "Líder de Equipo") {

@@ -170,6 +170,7 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Inscripción -->
+            @if(auth()->user()->rol !== 'Juez')
             <div class="card">
                 <h2 class="text-xl font-semibold text-universo-text mb-4">Inscripción</h2>
 
@@ -249,6 +250,7 @@
                     </div>
                 @endif
             </div>
+            @endif
 
             <!-- Participantes -->
             <div class="card">
