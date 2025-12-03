@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\Proyecto;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,5 +19,6 @@ class DatabaseSeeder extends Seeder
             'apellido_paterno' => 'User',
             'email' => 'test@example.com',
         ]);
+        Proyecto::factory()->count(8)->create();
     }
 }

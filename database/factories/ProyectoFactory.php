@@ -34,7 +34,7 @@ class ProyectoFactory extends Factory
             'contribuidores' => $this->faker->numberBetween(1, 25),
             'commits' => $this->faker->numberBetween(10, 500),
             'es_publico' => true,
-            'es_trending' => $this->faker->boolean(20), // 20% chance of being trending
+            'es_trending' => $this->faker->boolean(20), 
         ];
     }
 }
