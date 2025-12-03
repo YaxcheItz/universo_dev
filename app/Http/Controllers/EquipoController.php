@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\EquipoMiembro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SolicitudMiembro;
 
 class EquipoController extends Controller
 {
@@ -30,8 +31,21 @@ class EquipoController extends Controller
 
         $equipos = $query->paginate(12);
 
-        return view('equipos.index', compact('equipos'));
+        $solicitudesPendientes = collect();
+
+        if (Auth::user()->esLiderDeAlguno()) { // método que verifica si el usuario lidera algún equipo
+            $solicitudesPendientes = SolicitudMiembro::with('user', 'equipo')
+                ->where('estado', 'Pendiente')
+                ->whereHas('equipo', function($q) {
+                    $q->where('lider_id', Auth::id());
+                })
+                ->get();
+        }
+
+
+        return view('equipos.index', compact('equipos', 'solicitudesPendientes'));
     }
+
 
     /**
      * Mostrar formulario de creación
@@ -39,7 +53,6 @@ class EquipoController extends Controller
     public function create()
     {
         $rolesDisponibles = [
-            'Líder de Equipo',
             'Programador Frontend',
             'Programador Backend',
             'Full-Stack',
@@ -210,7 +223,7 @@ class EquipoController extends Controller
         }
 
         $rolesDisponibles = [
-            'Líder de Equipo',
+            
             'Programador Frontend',
             'Programador Backend',
             'Full-Stack',
@@ -221,7 +234,8 @@ class EquipoController extends Controller
             'ML Engineer',
             'QA Engineer',
             'UI/UX Designer',
-            'Product Manager'
+            'Product Manager',
+            'Otro'
         ];
         $miembros = $equipo->miembros()->get();
 
@@ -327,6 +341,71 @@ class EquipoController extends Controller
             ->with('success', 'Equipo eliminado exitosamente');
     }
 
+
+
+    public function solicitar(Request $request, Equipo $equipo)
+    {
+        if ($equipo->miembros_actuales >= $equipo->max_miembros) {
+            return back()->with('error', 'El equipo está lleno');
+        }
+
+        if ($equipo->miembros->contains('id', Auth::id())) {
+            return back()->with('error', 'Ya eres miembro de este equipo');
+        }
+
+        $request->validate([
+            'rol_equipo' => 'required|string'
+        ]);
+
+        SolicitudMiembro::create([
+            'equipo_id' => $equipo->id,
+            'user_id' => Auth::id(),
+            'rol_equipo' => $request->rol_equipo,
+            'estado' => 'Pendiente',
+        ]);
+
+        // Aquí se puede enviar notificación al líder
+        // $equipo->lider->notify(new NuevaSolicitud($solicitud));
+
+        return back()->with('success', 'Solicitud enviada al líder del equipo');
+    }
+
+    /**
+     * Aceptar o rechazar solicitud (solo líder)
+     */
+    public function manejarSolicitud(Request $request, SolicitudMiembro $solicitud)
+    {
+        $equipo = $solicitud->equipo;
+
+        if ($equipo->lider_id !== Auth::id()) {
+            abort(403, 'Solo el líder puede manejar solicitudes');
+        }
+
+        $request->validate([
+            'accion' => 'required|in:Aceptar,Rechazar'
+        ]);
+
+        if ($request->accion === 'Aceptar') {
+            $solicitud->estado = 'Aceptada';
+            $solicitud->save();
+
+            // Agregar al equipo
+            EquipoMiembro::create([
+                'equipo_id' => $equipo->id,
+                'user_id' => $solicitud->user_id,
+                'rol_equipo' => $solicitud->rol_equipo,
+                'fecha_ingreso' => now(),
+                'estado' => 'Activo',
+            ]);
+
+            $equipo->increment('miembros_actuales');
+        } else {
+            $solicitud->estado = 'Rechazada';
+            $solicitud->save();
+        }
+
+        return back()->with('success', 'Solicitud actualizada correctamente');
+    }
 
     /**
      * Unirse a un equipo

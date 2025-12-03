@@ -104,73 +104,45 @@
                 </div>
             </div>
 
-           <!-- Unirse al Equipo -->
-            @if(!$esMiembro && $equipo->acepta_miembros && $equipo->miembros_actuales < $equipo->max_miembros)
-                <div class="card bg-gradient-to-br from-universo-success/10 to-transparent border-universo-success/20">
-                    <div class="text-center mb-4">
-                        <div class="inline-flex p-3 rounded-full bg-universo-success/20 mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-success">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <line x1="19" x2="19" y1="8" y2="14"></line>
-                                <line x1="22" x2="16" y1="11" y2="11"></line>
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-universo-text mb-1">¡Únete ahora!</h3>
-                        <p class="text-sm text-universo-text-muted">Forma parte del equipo</p>
+           @if(!$esMiembro && $equipo->acepta_miembros && $equipo->miembros_actuales < $equipo->max_miembros)
+            <div class="card bg-gradient-to-br from-universo-success/10 to-transparent border-universo-success/20">
+                <div class="text-center mb-4">
+                    <div class="inline-flex p-3 rounded-full bg-universo-success/20 mb-3">
+                        <!-- icono -->
                     </div>
-                    
-                    <form action="{{ route('equipos.unirse', $equipo) }}" method="POST" class="space-y-3">
+                    <h3 class="text-lg font-bold text-universo-text mb-1">Solicitar Unirse</h3>
+                    <p class="text-sm text-universo-text-muted">Tu solicitud será revisada por el líder</p>
+                </div>
+
+                @php
+                    $solicitud = \App\Models\SolicitudMiembro::where('equipo_id', $equipo->id)
+                        ->where('user_id', Auth::id())->first();
+                @endphp
+
+                @if($solicitud)
+                    <div class="text-center p-3 bg-universo-dark rounded">
+                        <p class="text-universo-text font-medium">Solicitud enviada: {{ $solicitud->estado }}</p>
+                    </div>
+                @else
+                    <form action="{{ route('equipos.solicitar', $equipo) }}" method="POST" class="space-y-3">
                         @csrf
                         <div>
                             <label for="rol_equipo" class="block text-xs font-medium text-universo-text mb-1 uppercase tracking-wide">
                                 Selecciona tu Rol
                             </label>
-                            <select 
-                                name="rol_equipo" 
-                                id="rol_equipo" 
-                                class="input-field" 
-                                required>
+                            <select name="rol_equipo" id="rol_equipo" class="input-field" required>
                                 <option value="" disabled selected>Elige un rol...</option>
                                 @foreach($rolesDisponibles as $rol)
                                     <option value="{{ $rol }}">{{ $rol }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="w-full btn-primary">Unirse al Equipo</button>
+                        <button type="submit" class="w-full btn-primary">Enviar Solicitud</button>
                     </form>
-                </div>
-            @elseif($esMiembro)
-                <div class="card text-center bg-universo-success/5 border-universo-success/20">
-                    <div class="inline-flex p-3 rounded-full bg-universo-success/20 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-success">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    </div>
-                    <p class="text-universo-text mb-1 font-semibold">Miembro Activo</p>
-                    <p class="text-sm text-universo-text-muted">Formas parte de este equipo</p>
-                </div>
-            @elseif(!$equipo->acepta_miembros)
-                <div class="card text-center">
-                    <div class="inline-flex p-3 rounded-full bg-universo-text-muted/10 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-text-muted">
-                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                    </div>
-                    <p class="text-sm text-universo-text-muted">Equipo cerrado</p>
-                </div>
-            @else
-                <div class="card text-center">
-                    <div class="inline-flex p-3 rounded-full bg-universo-text-muted/10 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-text-muted">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <p class="text-sm text-universo-text-muted">Equipo completo</p>
-                </div>
+                @endif
+            </div>
             @endif
+
             <!-- Compartir -->
             <div class="card">
                 <h3 class="text-sm font-semibold text-universo-text mb-3 uppercase tracking-wide">Compartir</h3>
