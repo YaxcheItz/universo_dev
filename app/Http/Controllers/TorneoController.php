@@ -141,7 +141,7 @@ class TorneoController extends Controller
         ]);
 
         // --- Custom Validation: Ensure 'Inscripciones Abiertas' is not set if registration end date is in the past ---
-        $fechaRegistroFin = \Carbon\Carbon::parse($request->input('fecha_registro_fin'));
+        $fechaRegistroFin = \Carbon\Carbon::parse($request->input('fecha_registro_fin'))->endOfDay();
         $now = \Carbon\Carbon::now();
 
         if ($request->input('estado') === 'Inscripciones Abiertas' && $fechaRegistroFin->isPast()) {
@@ -301,7 +301,8 @@ class TorneoController extends Controller
         if ($hoy < $torneo->fecha_registro_inicio) {
             return back()->with('error', 'Las inscripciones aún no han iniciado. Inician el ' . $torneo->fecha_registro_inicio->format('d/m/Y'));
         }
-        if ($hoy > $torneo->fecha_registro_fin) {
+        // Usar endOfDay para permitir inscripciones durante todo el día de la fecha de fin
+        if ($hoy > \Carbon\Carbon::parse($torneo->fecha_registro_fin)->endOfDay()) {
             return back()->with('error', 'El período de inscripciones ha finalizado');
         }
 
