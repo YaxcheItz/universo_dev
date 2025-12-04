@@ -53,10 +53,10 @@
     <!-- Projects Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse ($proyectos as $proyecto)
-            <!-- Proyecto Card con click para editar -->
-            <div 
-                class="card-no-hover cursor-pointer group"
-                onclick="window.location.href='{{ Auth::check() && Auth::id() === $proyecto->user_id ? route('proyectos.edit', $proyecto) : route('proyectos.show', $proyecto) }}'"
+            <!-- Proyecto Card con click para ver y borde degradado -->
+            <div
+                class="proyecto-card relative cursor-pointer group rounded-xl p-4 transition-all duration-300 hover:scale-[1.02] bg-universo-card-bg border-2 border-universo-border"
+                onclick="window.location.href='{{ route('proyectos.show', $proyecto) }}'"
             >
                 <!-- Header del Proyecto -->
                 <div class="flex items-start justify-between mb-3">
@@ -147,8 +147,22 @@
 <!-- Nota visual para el usuario -->
 <div class="fixed bottom-4 right-4 bg-universo-card-bg border border-universo-border rounded-lg p-4 shadow-lg max-w-sm hidden" id="edit-hint">
     <p class="text-sm text-universo-text mb-1"> <strong>Tip:</strong></p>
-    <p class="text-xs text-universo-text-muted">Haz click en cualquier proyecto para editarlo</p>
+    <p class="text-xs text-universo-text-muted">Haz click en cualquier proyecto para ver sus detalles</p>
 </div>
+
+<style>
+.proyecto-card {
+    position: relative;
+    background: linear-gradient(var(--universo-card-bg), var(--universo-card-bg)) padding-box,
+                linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(107, 114, 128, 0.3)) border-box;
+}
+
+.proyecto-card:hover {
+    background: linear-gradient(var(--universo-card-bg), var(--universo-card-bg)) padding-box,
+                linear-gradient(135deg, #a855f7, #ec4899, #a855f7) border-box;
+    border-color: transparent;
+}
+</style>
 
 <script>
 // Mostrar hint al cargar la página
