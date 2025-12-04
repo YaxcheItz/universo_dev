@@ -84,7 +84,6 @@ class Equipo extends Model
             ->withTimestamps();
     }
 
-    // scopes
     /**
      * Equipos activos
      */

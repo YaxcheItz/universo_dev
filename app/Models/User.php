@@ -104,7 +104,6 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    // ==================== ACCESSORS ====================
 
     /**
      * Obtener el nombre completo del usuario
@@ -123,8 +122,6 @@ class User extends Authenticatable
         $apellido = substr($this->apellido_paterno, 0, 1);
         return strtoupper($nombre . $apellido);
     }
-
-    // ==================== SCOPES ====================
 
     /**
      * Usuarios por rol
