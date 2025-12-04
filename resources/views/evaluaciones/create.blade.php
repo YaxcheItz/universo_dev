@@ -95,7 +95,8 @@
                                 max="100"
                                 value="50"
                                 class="flex-1 h-2 bg-universo-card rounded-lg appearance-none cursor-pointer accent-purple-500"
-                                oninput="updateValue(this.value, {{ $index }})"
+                                onchange="document.getElementById('value_{{ $index }}').textContent = this.value"
+                                oninput="document.getElementById('value_{{ $index }}').textContent = this.value"
                                 required
                             >
                             <div class="flex items-center gap-2">
@@ -109,12 +110,6 @@
                             <span>50 - Regular</span>
                             <span>100 - Excelente</span>
                         </div>
-
-                        <script>
-                            function updateValue(value, index) {
-                                document.getElementById('value_' + index).textContent = value;
-                            }
-                        </script>
 
                         @error('calificaciones.' . $criterio)
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
