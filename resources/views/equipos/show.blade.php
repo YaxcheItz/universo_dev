@@ -21,6 +21,8 @@
                         </span>
                         @if($equipo->acepta_miembros)
                             <span class="badge badge-cyan">Aceptando Miembros</span>
+                        @else
+                            <span class="badge badge-red">No acepta miembros</span>
                         @endif
                     </div>
                     
@@ -34,6 +36,7 @@
                     @endif
                 </div>
             </div>
+                        
 
             <div class="flex gap-3 lg:flex-shrink-0">
                 <div class="text-center">
@@ -53,6 +56,26 @@
                     <div class="text-[10px] text-universo-text-muted uppercase tracking-wide">Torneos</div>
                 </div>
             </div>
+            @if(Auth::id() === $equipo->lider_id)
+                <div class="flex gap-2 mt-4">
+                    
+                    <a href="{{ route('equipos.edit', $equipo) }}"
+                    class="btn-secondary ">
+                         Editar Equipo
+                    </a>
+                    <form action="{{ route('equipos.destroy', $equipo) }}"
+                        method="POST"
+                        onsubmit="return confirm('⚠️ ¿Estás seguro de eliminar este equipo? Esta acción no se puede deshacer.')">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit"
+                                class="btn-secondary text-red-400">
+                            Eliminar
+                        </button>
+                    </form>
+                </div>
+            @endif
 
             </div>
         </div>
@@ -117,8 +140,7 @@
                     </div>
                 </div>
             </div>
-
-           @if(!$esMiembro && $equipo->acepta_miembros && $equipo->miembros_actuales < $equipo->max_miembros)
+            @if(!$esMiembro && $equipo->acepta_miembros && $equipo->miembros_actuales < $equipo->max_miembros)
             <div class="card bg-gradient-to-br from-universo-success/10 to-transparent border-universo-success/20">
                 <div class="text-center mb-4">
                     <div class="inline-flex p-3 rounded-full bg-universo-success/20 mb-3">
@@ -156,6 +178,9 @@
                 @endif
             </div>
             @endif
+
+
+
 
             <!-- Compartir -->
             <div class="card">

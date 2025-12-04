@@ -83,14 +83,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/equipos/{equipo}', [EquipoController::class, 'update'])->name('equipos.update');
     Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
 
-    // Unirse, salir y manejar miembros
-    Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
-    Route::post('/equipos/{equipo}/salir', [EquipoController::class, 'salir'])->name('equipos.salir');
-    Route::post('/equipos/{equipo}/agregar-miembro', [EquipoController::class, 'agregarMiembro'])->name('equipos.agregarMiembro');
-    Route::delete('/equipos/{equipo}/remover/{user}', [EquipoController::class, 'removerMiembro'])->name('equipos.removerMiembro');
-
-    // Solicitudes
-    Route::post('/equipos/{equipo}/solicitar', [EquipoController::class,'solicitar'])->name('equipos.solicitar');
 
     // Manejar solicitudes (aceptar/rechazar)
     Route::post('/equipos/solicitudes/{solicitud}/aceptar', [EquipoController::class, 'manejarSolicitud'])
@@ -111,10 +103,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/solicitudes/{equipoSolicitud}/aceptar', [EquipoSolicitudController::class, 'aceptar'])->name('solicitudes.aceptar');
     Route::post('/solicitudes/{equipoSolicitud}/rechazar', [EquipoSolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
     
-    // Perfil
-    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
-    Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    //rutas solicitar-equipo Magali
+    Route::post('/equipos/{equipo}/solicitar', [EquipoController::class,'solicitar'])->name('equipos.solicitar');
+    Route::post('/solicitudes/{solicitud}/manejar', [EquipoController::class,'manejarSolicitud'])->name('solicitudes.manejar');
+
 
     // Evaluaciones (solo para Jueces)
     Route::get('/evaluaciones', [EvaluacionController::class, 'index'])->name('evaluaciones.index');
