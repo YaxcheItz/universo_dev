@@ -53,24 +53,6 @@
                     <div class="text-[10px] text-universo-text-muted uppercase tracking-wide">Torneos</div>
                 </div>
             </div>
-            
-            @if(Auth::id() === $equipo->lider_id)
-                <div class="flex gap-2">
-                    <!-- Editar -->
-                    <a href="{{ route('equipos.edit', $equipo) }}"
-                    class="btn-primary  py-4 text-sm whitespace-nowrap">
-                        Editar
-                    </a>
-
-                    <!-- Eliminar el equipo completo -->
-                    <button
-                        type="button"
-                        onclick="confirmarEliminacionEquipo()"
-                        class=" py-4 text-sm text-red-500 whitespace-nowrap">
-                        Eliminar
-                    </button>
-                </div>
-            @endif
 
             </div>
         </div>
@@ -324,17 +306,6 @@ function copiarEnlace() {
         alert('¡Enlace copiado al portapapeles!');
     });
 }
-function confirmarEliminacionEquipo() {
-    const confirmar = confirm(
-        'Esta acción eliminará el equipo PERMANENTEMENTE.\n' +
-        'Se perderán todos los miembros y datos.\n\n' +
-        '¿Deseas continuar?'
-    );
-
-    if (confirmar) {
-        document.getElementById('form-eliminar-equipo').submit();
-    }
-}
 </script>
 
 @if(session('success'))
@@ -348,16 +319,5 @@ function confirmarEliminacionEquipo() {
     alert('{{ session('error') }}');
 </script>
 @endif
-
-@if(Auth::id() === $equipo->lider_id)
-<form id="form-eliminar-equipo"
-      action="{{ route('equipos.destroy', $equipo) }}"
-      method="POST"
-      class="hidden">
-    @csrf
-    @method('DELETE')
-</form>
-@endif
-
 
 @endsection
