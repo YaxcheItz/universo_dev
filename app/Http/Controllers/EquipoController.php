@@ -13,39 +13,73 @@ use App\Models\SolicitudMiembro;
 class EquipoController extends Controller
 {
     /**
-     * Mostrar lista de equipos
-     */
-    public function index(Request $request)
-    {
-        $query = Equipo::with('lider')
-            ->activos()
-            ->publicos()
-            ->orderBy('created_at', 'desc');
+ * Mostrar lista de equipos
+ */
+public function index(Request $request)
+{
+    $userId = Auth::id();
 
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+    // ========== MIS EQUIPOS DONDE SOY LÍDER ==========
+    $misEquiposLider = Equipo::where('lider_id', $userId)
+        ->with(['lider', 'miembros'])
+        ->withCount('miembros')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        if ($request->filled('acepta_miembros') && $request->acepta_miembros == '1') {
-            $query->aceptanMiembros();
-        }
+    // ========== MIS EQUIPOS DONDE SOY MIEMBRO (NO LÍDER) ==========
+    $misEquiposMiembro = Equipo::whereHas('miembros', function($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+        ->where('lider_id', '!=', $userId) // Excluir equipos donde soy líder
+        ->with(['lider', 'miembros'])
+        ->withCount('miembros')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        $equipos = $query->paginate(12);
+    // ========== EQUIPOS PÚBLICOS (EXCLUIR MIS EQUIPOS) ==========
+    $misEquiposIds = $misEquiposLider->pluck('id')
+        ->merge($misEquiposMiembro->pluck('id'))
+        ->toArray();
 
-        $solicitudesPendientes = collect();
-
-        if (Auth::user()->esLiderDeAlguno()) { // método que verifica si el usuario lidera algún equipo
-            $solicitudesPendientes = SolicitudMiembro::with('user', 'equipo')
-                ->where('estado', 'Pendiente')
-                ->whereHas('equipo', function($q) {
-                    $q->where('lider_id', Auth::id());
-                })
-                ->get();
-        }
+    $query = Equipo::with(['lider', 'miembros'])
+        ->withCount('miembros')
+        ->activos()
+        ->publicos()
+        ->orderBy('created_at', 'desc');
 
 
-        return view('equipos.index', compact('equipos', 'solicitudesPendientes'));
+    // Filtros de búsqueda
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
     }
+
+    if ($request->filled('acepta_miembros') && $request->acepta_miembros == '1') {
+        $query->aceptanMiembros();
+    } elseif ($request->filled('acepta_miembros') && $request->acepta_miembros == '0') {
+        $query->where('acepta_miembros', false);
+    }
+
+    $equipos = $query->paginate(12)->withQueryString();
+
+    // ========== SOLICITUDES PENDIENTES (SI SOY LÍDER) ==========
+    $solicitudesPendientes = collect();
+
+    if (Auth::user()->esLiderDeAlguno()) {
+        $solicitudesPendientes = SolicitudMiembro::with('user', 'equipo')
+            ->where('estado', 'Pendiente')
+            ->whereHas('equipo', function($q) use ($userId) {
+                $q->where('lider_id', $userId);
+            })
+            ->get();
+    }
+
+    return view('equipos.index', compact(
+        'equipos',
+        'misEquiposLider',
+        'misEquiposMiembro',
+        'solicitudesPendientes'
+    ));
+}
 
 
     /**
@@ -154,11 +188,13 @@ class EquipoController extends Controller
         'max_miembros' => $validated['max_miembros'],
         'tecnologias' => $tecnologiasArray,
         'es_publico' => $request->boolean('es_publico'),
-        'acepta_miembros' => $request->boolean('acepta_miembros'),
+        // Si los miembros iniciales + líder llenan el equipo, no aceptar más miembros
+        'acepta_miembros' => (count($validated['miembros'] ?? []) + 1) < $validated['max_miembros'],
         'lider_id' => $liderId,
         'fecha_creacion' => now(),
         'miembros_actuales' => 0, // se irá sumando
     ]);
+
 
     /* AGREGAR MIEMBROS */
 
@@ -367,7 +403,7 @@ class EquipoController extends Controller
             ->with('success', 'Equipo eliminado exitosamente');
     }
 
-
+ //este es para Seccion equipos-Magali
 
     public function solicitar(Request $request, Equipo $equipo)
     {
@@ -390,14 +426,11 @@ class EquipoController extends Controller
             'estado' => 'Pendiente',
         ]);
 
-        // Aquí se puede enviar notificación al líder
-        // $equipo->lider->notify(new NuevaSolicitud($solicitud));
-
         return back()->with('success', 'Solicitud enviada al líder del equipo');
     }
 
     /**
-     * Aceptar o rechazar solicitud (solo líder)
+     * Aceptar o rechazar solicitud -seccion equipo--Magali
      */
     public function manejarSolicitud(Request $request, SolicitudMiembro $solicitud)
     {

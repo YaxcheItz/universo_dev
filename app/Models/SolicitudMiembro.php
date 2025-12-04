@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SolicitudMiembro extends Model
 {
     use HasFactory;
-    protected $table = 'solicitudes_miembros'; 
+    protected $table = 'solicitud_miembros'; 
 
     protected $fillable = ['equipo_id','user_id','rol_equipo','estado'];
 
