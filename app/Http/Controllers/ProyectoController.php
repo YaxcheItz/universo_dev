@@ -46,7 +46,7 @@ class ProyectoController extends Controller
             'lenguaje_principal' => 'required|string',
             'tecnologias' => 'nullable|array',
             'estado' => 'required|string',
-            'equipo_id' => 'nullable|exists:equipos,id',
+            'equipo_id' => 'required|exists:equipos,id',
         ]);
 
         $validated['user_id'] = Auth::id();
