@@ -71,10 +71,31 @@
             </div>
         </div>
 
+        <!-- Equipo -->
+        <div class="card">
+            <h2 class="text-xl font-semibold text-universo-text mb-4">Equipo de Trabajo</h2>
+
+            <div>
+                <label for="equipo_id" class="block text-sm font-medium text-universo-text mb-2">Seleccionar Equipo (opcional)</label>
+                <select name="equipo_id" id="equipo_id" class="input-field">
+                    <option value="">Sin equipo (proyecto individual)</option>
+                    @forelse($equiposLiderados as $equipo)
+                        <option value="{{ $equipo->id }}" {{ old('equipo_id') == $equipo->id ? 'selected' : '' }}>
+                            {{ $equipo->name }} ({{ $equipo->miembros_actuales }} miembros)
+                        </option>
+                    @empty
+                        <option value="" disabled>No eres líder de ningún equipo aún</option>
+                    @endforelse
+                </select>
+                <p class="mt-1 text-sm text-universo-text-muted">Solo puedes asignar equipos donde eres el líder</p>
+                @error('equipo_id')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
+            </div>
+        </div>
+
         <!-- Estado y Fechas -->
         <div class="card">
             <h2 class="text-xl font-semibold text-universo-text mb-4">Estado del Proyecto</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="estado" class="block text-sm font-medium text-universo-text mb-2">Estado *</label>

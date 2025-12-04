@@ -60,6 +60,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Archivos subidos por el usuario
+     */
+    public function archivosSubidos() 
+    { 
+        return $this->hasMany(ArchivoProyecto::class, 'user_id'); 
+    }
+
+
+    /**
      * Equipos donde el usuario es líder
      */
     public function equiposLiderados()
