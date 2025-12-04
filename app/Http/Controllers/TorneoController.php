@@ -145,16 +145,13 @@ class TorneoController extends Controller
         $now = \Carbon\Carbon::now();
 
         if ($request->input('estado') === 'Inscripciones Abiertas' && $fechaRegistroFin->isPast()) {
-            return back()->withErrors(['estado' => 'No puedes establecer el estado "Inscripciones Abiertas" si la fecha de fin de registro ya ha pasado. Por favor, selecciona "En Curso" o "Próximo" según corresponda.'])->withInput();
+            return back()->withErrors(['estado' => 'No puedes establecer el estado "Inscripciones Abiertas" si la fecha de fin de registro ya ha pasado.'])->withInput();
         }
-        // --- End Custom Validation ---
 
         $validated['user_id'] = Auth::id();
         $validated['participantes_actuales'] = 0;
         $validated['es_publico'] = $request->input('es_publico', 0) == 1;
 
-        // Los torneos se crean siempre con estado "Inscripciones Abiertas"
-        // El comando actualiza el estado automáticamente según las fechas
         $validated['estado'] = 'Inscripciones Abiertas';
 
         $torneo = Torneo::create($validated);
@@ -276,7 +273,7 @@ class TorneoController extends Controller
     {
         // VALIDACIÓN 0: Los jueces no pueden inscribirse en torneos
         if (Auth::user()->rol === 'Juez') {
-            return back()->with('error', 'Los jueces no pueden inscribirse en torneos. Tu rol es evaluar proyectos.');
+            return back()->with('error', 'Los jueces no pueden inscribirse en torneos.');
         }
 
         $request->validate([

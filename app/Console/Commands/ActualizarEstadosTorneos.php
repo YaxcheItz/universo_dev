@@ -86,12 +86,12 @@ class ActualizarEstadosTorneos extends Command
         }
 
         // 4. Evaluación: Después del fin del torneo (durante 30 días para evaluar)
-        if ($ahora->isAfter($fechaFinCompleta) && $ahora->diffInDays($torneo->fecha_fin) <= 30) {
+        if ($ahora->isAfter($fechaFinCompleta) && $ahora->diffInDays($torneo->fecha_fin) <= 2) {
             return 'Evaluación';
         }
 
         // 5. Finalizado: Más de 30 días después del fin
-        if ($ahora->diffInDays($torneo->fecha_fin) > 30) {
+        if ($ahora->diffInDays($torneo->fecha_fin) > 2) {
             return 'Finalizado';
         }
 
