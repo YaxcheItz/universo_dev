@@ -18,9 +18,9 @@
                 </div>
                 <div class="flex-1">
                     <h1 class="text-2xl font-bold text-universo-text mb-1">Evaluar Equipo</h1>
-                    <p class="text-lg text-universo-purple font-semibold mb-2">{{ $participacion->equipo->name }}</p>
+                    <p class="text-lg text-universo-purple font-semibold mb-2">{{ $participacion->equipo->name ?? 'Equipo' }}</p>
                     <p class="text-sm text-universo-text-muted">
-                        Torneo: <span class="text-universo-text">{{ $participacion->torneo->name }}</span>
+                        Torneo: <span class="text-universo-text">{{ $participacion->torneo->name ?? 'Torneo' }}</span>
                     </p>
                 </div>
             </div>
@@ -34,7 +34,7 @@
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-universo-text mb-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-cyan"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
-                    {{ $participacion->proyecto->name }}
+                    {{ $participacion->proyecto->name ?? 'Proyecto' }}
                 </h3>
                 <p class="text-sm text-universo-text-muted mb-3">{{ $participacion->proyecto->descripcion }}</p>
 
@@ -95,7 +95,8 @@
                                 max="100"
                                 value="50"
                                 class="flex-1 h-2 bg-universo-card rounded-lg appearance-none cursor-pointer accent-purple-500"
-                                oninput="updateValue(this.value, {{ $index }})"
+                                onchange="document.getElementById('value_{{ $index }}').textContent = this.value"
+                                oninput="document.getElementById('value_{{ $index }}').textContent = this.value"
                                 required
                             >
                             <div class="flex items-center gap-2">
@@ -109,12 +110,6 @@
                             <span>50 - Regular</span>
                             <span>100 - Excelente</span>
                         </div>
-
-                        <script>
-                            function updateValue(value, index) {
-                                document.getElementById('value_' + index).textContent = value;
-                            }
-                        </script>
 
                         @error('calificaciones.' . $criterio)
                             <p class="text-red-500 text-sm mt-2">{{ $message }}</p>

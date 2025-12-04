@@ -46,7 +46,7 @@ class EvaluacionController extends Controller
         }
 
         $participaciones = $torneo->participaciones()
-            ->with(['equipo.lider', 'equipo.miembros', 'proyecto', 'evaluaciones'])
+            ->with(['equipo.lider', 'equipo.miembros', 'proyecto', 'evaluaciones.juez'])
             ->get();
 
         // Verificar qué participaciones ya fueron evaluadas por este juez

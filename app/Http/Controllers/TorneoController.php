@@ -141,7 +141,7 @@ class TorneoController extends Controller
         ]);
 
         // --- Custom Validation: Ensure 'Inscripciones Abiertas' is not set if registration end date is in the past ---
-        $fechaRegistroFin = \Carbon\Carbon::parse($request->input('fecha_registro_fin'));
+        $fechaRegistroFin = \Carbon\Carbon::parse($request->input('fecha_registro_fin'))->endOfDay();
         $now = \Carbon\Carbon::now();
 
         if ($request->input('estado') === 'Inscripciones Abiertas' && $fechaRegistroFin->isPast()) {
@@ -301,7 +301,8 @@ class TorneoController extends Controller
         if ($hoy < $torneo->fecha_registro_inicio) {
             return back()->with('error', 'Las inscripciones aún no han iniciado. Inician el ' . $torneo->fecha_registro_inicio->format('d/m/Y'));
         }
-        if ($hoy > $torneo->fecha_registro_fin) {
+        // Usar endOfDay para permitir inscripciones durante todo el día de la fecha de fin
+        if ($hoy > \Carbon\Carbon::parse($torneo->fecha_registro_fin)->endOfDay()) {
             return back()->with('error', 'El período de inscripciones ha finalizado');
         }
 
@@ -390,18 +391,18 @@ class TorneoController extends Controller
         // Solo procesar si el usuario está autenticado
         if ($user) {
             // Obtener IDs de equipos del usuario que están participando en ESTE torneo
-            $equiposDelUsuarioEnTorneo = $user->equipos()
+            $equiposDelUsuarioEnTorneo = Equipo::where('lider_id', $user->id)
                 ->whereHas('torneoParticipaciones', function($query) use ($torneo) {
                     $query->where('torneo_id', $torneo->id);
                 })
-                ->pluck('equipos.id')
+                ->pluck('id')
                 ->toArray();
 
             // Si el usuario ya está en un equipo del torneo, no puede solicitar unirse a otros
             $userYaEnTorneo = count($equiposDelUsuarioEnTorneo) > 0;
 
             // IDs de todos los equipos del usuario (para verificar si ya es miembro)
-            $userTeamIds = $user->equipos->pluck('id')->toArray();
+            $userTeamIds = Equipo::where('lider_id', $user->id)->pluck('id')->toArray();
 
             // IDs de equipos donde el usuario tiene solicitudes pendientes
             $userPendingRequestTeamIds = EquipoSolicitud::where('user_id', $user->id)
