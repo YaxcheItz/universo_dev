@@ -106,7 +106,7 @@
                         </div>
 
                         <div class="flex justify-between mt-2 text-xs text-universo-text-muted">
-                            <span>0 - Muy deficiente</span>
+                            <span>0 - Deficiente</span>
                             <span>50 - Regular</span>
                             <span>100 - Excelente</span>
                         </div>
@@ -138,7 +138,7 @@
                 placeholder="Escribe comentarios constructivos sobre el proyecto del equipo..."
             ></textarea>
             <p class="text-xs text-universo-text-muted mt-2">
-                Estos comentarios son privados y solo serán visibles para otros jueces y organizadores.
+                Estos comentarios son privados y solo serán visibles para otros jueces.
             </p>
             @error('comentarios')
                 <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
