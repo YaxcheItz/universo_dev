@@ -111,4 +111,21 @@ class Equipo extends Model
         return $query->where('acepta_miembros', true)
             ->whereColumn('miembros_actuales', '<', 'max_miembros');
     }
+
+    /**
+     * Verificar si un usuario es miembro del equipo
+     */
+    public function esMiembro(User $user)
+    {
+        return $this->lider_id === $user->id ||
+               $this->miembros()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Verificar si un usuario es el líder del equipo
+     */
+    public function esLider(User $user)
+    {
+        return $this->lider_id === $user->id;
+    }
 }
