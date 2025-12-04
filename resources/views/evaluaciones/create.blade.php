@@ -95,7 +95,7 @@
                                 max="100"
                                 value="50"
                                 class="flex-1 h-2 bg-universo-card rounded-lg appearance-none cursor-pointer accent-purple-500"
-                                oninput="updateValue{{ $index }}(this.value)"
+                                oninput="updateValue(this.value, {{ $index }})"
                                 required
                             >
                             <div class="flex items-center gap-2">
@@ -111,8 +111,8 @@
                         </div>
 
                         <script>
-                            function updateValue{{ $index }}(value) {
-                                document.getElementById('value_{{ $index }}').textContent = value;
+                            function updateValue(value, index) {
+                                document.getElementById('value_' + index).textContent = value;
                             }
                         </script>
 

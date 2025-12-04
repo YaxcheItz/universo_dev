@@ -382,25 +382,33 @@ class TorneoController extends Controller
 
         $user = Auth::user();
 
-        // Obtener IDs de equipos del usuario que están participando en ESTE torneo
-        $equiposDelUsuarioEnTorneo = $user->equipos()
-            ->whereHas('torneoParticipaciones', function($query) use ($torneo) {
-                $query->where('torneo_id', $torneo->id);
-            })
-            ->pluck('equipos.id')
-            ->toArray();
+        // Inicializar variables por defecto
+        $userYaEnTorneo = false;
+        $userTeamIds = [];
+        $userPendingRequestTeamIds = [];
 
-        // Si el usuario ya está en un equipo del torneo, no puede solicitar unirse a otros
-        $userYaEnTorneo = count($equiposDelUsuarioEnTorneo) > 0;
+        // Solo procesar si el usuario está autenticado
+        if ($user) {
+            // Obtener IDs de equipos del usuario que están participando en ESTE torneo
+            $equiposDelUsuarioEnTorneo = $user->equipos()
+                ->whereHas('torneoParticipaciones', function($query) use ($torneo) {
+                    $query->where('torneo_id', $torneo->id);
+                })
+                ->pluck('equipos.id')
+                ->toArray();
 
-        // IDs de todos los equipos del usuario (para verificar si ya es miembro)
-        $userTeamIds = $user->equipos->pluck('id')->toArray();
+            // Si el usuario ya está en un equipo del torneo, no puede solicitar unirse a otros
+            $userYaEnTorneo = count($equiposDelUsuarioEnTorneo) > 0;
 
-        // IDs de equipos donde el usuario tiene solicitudes pendientes
-        $userPendingRequestTeamIds = EquipoSolicitud::where('user_id', $user->id)
-            ->where('estado', 'pendiente')
-            ->pluck('equipo_id')
-            ->toArray();
+            // IDs de todos los equipos del usuario (para verificar si ya es miembro)
+            $userTeamIds = $user->equipos->pluck('id')->toArray();
+
+            // IDs de equipos donde el usuario tiene solicitudes pendientes
+            $userPendingRequestTeamIds = EquipoSolicitud::where('user_id', $user->id)
+                ->where('estado', 'pendiente')
+                ->pluck('equipo_id')
+                ->toArray();
+        }
 
         return view('torneos.participantes', compact('torneo', 'participaciones', 'userTeamIds', 'userPendingRequestTeamIds', 'userYaEnTorneo'));
     }
