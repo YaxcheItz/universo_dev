@@ -6,7 +6,8 @@
       "Bash(php test_solicitud.php:*)",
       "Bash(del:*)",
       "Bash(git restore:*)",
-      "Bash(php artisan:*)"
+      "Bash(php artisan:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

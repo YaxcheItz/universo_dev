@@ -116,7 +116,7 @@
                 </div>
 
                 <div>
-                    <label for="max_participantes" class="block text-sm font-medium text-universo-text mb-2">Máximo de Equipos</label>
+                    <label for="max_participantes" class="block text-sm font-medium text-universo-text mb-2">Número Máximo De Equipos</label>
                     <input type="number" name="max_participantes" id="max_participantes" min="1" class="input-field" value="{{ old('max_participantes') }}" placeholder="Ilimitado">
                     @error('max_participantes')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
                 </div>
