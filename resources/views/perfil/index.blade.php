@@ -61,6 +61,8 @@
         </div>
 
         <!-- Botón Editar Perfil -->
+        <!-- MODIFICADO: Botón para editar perfil-->
+        <!-- Ruta: route('perfil.edit') -> PerfilController@edit() -> GET /perfil/edit -->
         <a href="{{ route('perfil.edit') }}" class="absolute top-6 right-6 btn-secondary btn-sm flex items-center gap-2 hover:scale-105 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit w-4 h-4">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -182,11 +184,126 @@
 
             <!-- Tab: Equipos -->
             <div id="tab-content-equipos" class="tab-content hidden">
-                <h3 class="text-xl md:text-2xl font-bold text-universo-text mb-2">Equipos</h3>
-                <p class="text-universo-text-muted mb-6">Equipos a los que perteneces</p>
-                <div class="text-center py-12 text-universo-text-muted">
-                    <p>Próximamente contenido de equipos...</p>
-                </div>
+                <h3 class="text-xl md:text-2xl font-bold text-universo-text mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users w-6 h-6 text-universo-cyan">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Equipos
+                </h3>
+                <p class="text-universo-text-muted mb-6">Equipos a los que perteneces ({{ $user->equipos->count() }})</p>
+
+                @if($user->equipos->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach($user->equipos as $equipo)
+                            <div class="card p-5 hover:shadow-lg transition-shadow">
+                                <div class="flex items-start gap-4">
+                                    <!-- Avatar del equipo -->
+                                    <div class="flex-shrink-0">
+                                        @if($equipo->avatar)
+                                            <img
+                                                src="{{ asset('storage/' . $equipo->avatar) }}"
+                                                alt="Avatar de {{ $equipo->name }}"
+                                                class="w-16 h-16 rounded-lg object-cover border-2 border-universo-purple">
+                                        @else
+                                            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-universo-purple to-universo-cyan flex items-center justify-center text-white text-xl font-bold">
+                                                {{ substr($equipo->name, 0, 2) }}
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Información del equipo -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-start justify-between gap-2 mb-2">
+                                            <h4 class="text-lg font-semibold text-universo-text truncate">
+                                                {{ $equipo->name }}
+                                            </h4>
+                                            <span class="badge badge-{{ $equipo->pivot->rol_equipo === 'Líder' ? 'purple' : 'cyan' }} text-xs whitespace-nowrap flex-shrink-0">
+                                                {{ $equipo->pivot->rol_equipo ?? 'Miembro' }}
+                                            </span>
+                                        </div>
+
+                                        @if($equipo->descripcion)
+                                            <p class="text-sm text-universo-text-muted line-clamp-2 mb-3">
+                                                {{ $equipo->descripcion }}
+                                            </p>
+                                        @endif
+
+                                        <!-- Información adicional -->
+                                        <div class="flex items-center gap-4 text-xs text-universo-text-muted mb-3">
+                                            <div class="flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users">
+                                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                </svg>
+                                                <span>{{ $equipo->miembros_actuales }}/{{ $equipo->max_miembros }}</span>
+                                            </div>
+                                            @if($equipo->pivot->fecha_ingreso)
+                                                <div class="flex items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar">
+                                                        <path d="M8 2v4"></path>
+                                                        <path d="M16 2v4"></path>
+                                                        <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                                        <path d="M3 10h18"></path>
+                                                    </svg>
+                                                    <span>Desde {{ \Carbon\Carbon::parse($equipo->pivot->fecha_ingreso)->format('M Y') }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <!-- Tecnologías -->
+                                        @if($equipo->tecnologias && count($equipo->tecnologias) > 0)
+                                            <div class="flex flex-wrap gap-1 mb-3">
+                                                @foreach(array_slice($equipo->tecnologias, 0, 3) as $tech)
+                                                    <span class="text-xs px-2 py-1 rounded-md bg-universo-purple/10 text-universo-purple">
+                                                        {{ $tech }}
+                                                    </span>
+                                                @endforeach
+                                                @if(count($equipo->tecnologias) > 3)
+                                                    <span class="text-xs px-2 py-1 rounded-md bg-universo-purple/10 text-universo-purple">
+                                                        +{{ count($equipo->tecnologias) - 3 }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        <!-- Link al equipo -->
+                                        <a href="{{ route('equipos.show', $equipo) }}" class="text-sm text-universo-cyan hover:text-universo-purple transition-colors font-medium inline-flex items-center gap-1">
+                                            Ver equipo
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right">
+                                                <path d="M5 12h14"></path>
+                                                <path d="m12 5 7 7-7 7"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-12">
+                        <div class="w-20 h-20 rounded-full bg-universo-purple/10 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users text-universo-purple">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <p class="text-universo-text-muted mb-4">Aún no formas parte de ningún equipo</p>
+                        <a href="{{ route('equipos.index') }}" class="btn-primary inline-flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            Explorar equipos
+                        </a>
+                    </div>
+                @endif
             </div>
 
             <!-- Tab: Estadísticas -->
