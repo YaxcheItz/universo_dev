@@ -70,15 +70,15 @@
                     <div class="flex-1">
                         <div class="flex items-start justify-between mb-4">
                             <div>
-                                <h3 class="text-xl font-bold text-universo-text mb-2">{{ $participacion->equipo->name }}</h3>
+                                <h3 class="text-xl font-bold text-universo-text mb-2">{{ $participacion->equipo->name ?? 'Equipo' }}</h3>
                                 <p class="text-sm text-universo-text-muted mb-3">
-                                    Líder: <span class="text-universo-purple">{{ $participacion->equipo->lider->name }}</span>
+                                    Líder: <span class="text-universo-purple">{{ $participacion->equipo->lider->name ?? 'Líder' }}</span>
                                 </p>
 
                                 @if($participacion->proyecto)
                                     <div class="flex items-center gap-2 text-sm text-universo-text mb-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-universo-cyan"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
-                                        <span>Proyecto: <strong>{{ $participacion->proyecto->name }}</strong></span>
+                                        <span>Proyecto: <strong>{{ $participacion->proyecto->name ?? 'Sin nombre' }}</strong></span>
                                     </div>
                                 @endif
                             </div>
@@ -96,10 +96,47 @@
                             <p class="text-sm font-semibold text-universo-text mb-2">Miembros ({{ $participacion->equipo->miembros->count() }}):</p>
                             <div class="flex flex-wrap gap-2">
                                 @foreach($participacion->equipo->miembros as $miembro)
-                                    <span class="badge badge-text-muted">{{ $miembro->name }}</span>
+                                    <span class="badge badge-text-muted">{{ $miembro->name ?? 'Miembro' }}</span>
                                 @endforeach
                             </div>
                         </div>
+
+                        <!-- Evaluaciones de Otros Jueces -->
+                        @php
+                            $evaluacionesOtrosJueces = $participacion->evaluaciones->where('juez_id', '!=', Auth::id());
+                        @endphp
+
+                        @if($evaluacionesOtrosJueces->count() > 0)
+                        <div class="mb-4 p-4 bg-universo-dark rounded-lg border border-purple-500/20">
+                            <h4 class="text-sm font-semibold text-universo-text mb-3 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><circle cx="12" cy="10" r="2"></circle><line x1="8" x2="8" y1="2" y2="4"></line><line x1="16" x2="16" y1="2" y2="4"></line></svg>
+                                Evaluaciones de Otros Jueces ({{ $evaluacionesOtrosJueces->count() }})
+                            </h4>
+                            <div class="space-y-3">
+                                @foreach($evaluacionesOtrosJueces as $evaluacion)
+                                <div class="p-3 bg-universo-bg rounded-lg border border-universo-border">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                                <span class="text-xs font-bold text-purple-400">{{ substr($evaluacion->juez->name ?? 'JZ', 0, 2) }}</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-universo-text">{{ $evaluacion->juez->name ?? 'Juez' }}</span>
+                                        </div>
+                                        <span class="text-lg font-bold text-purple-400">{{ number_format($evaluacion->puntaje_total, 1) }}</span>
+                                    </div>
+                                    @if($evaluacion->comentarios)
+                                    <div class="mt-2 text-sm text-universo-text-muted italic border-l-2 border-purple-500/30 pl-3">
+                                        "{{ $evaluacion->comentarios }}"
+                                    </div>
+                                    @endif
+                                    <div class="mt-2 text-xs text-universo-text-muted">
+                                        Evaluado el {{ $evaluacion->created_at->format('d/m/Y H:i') }}
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Estadísticas de Evaluación -->
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 bg-universo-dark rounded-lg">

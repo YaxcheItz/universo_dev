@@ -51,7 +51,7 @@
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">
                             <h3 class="text-xl font-bold text-universo-text mb-2">{{ $torneo->name }}</h3>
-                            <p class="text-sm text-universo-text-muted mb-3">Organizado por {{ $torneo->organizador->name }}</p>
+                            <p class="text-sm text-universo-text-muted mb-3">Organizado por {{ $torneo->organizador->name ?? 'Organizador' }}</p>
 
                             <div class="flex flex-wrap gap-2 mb-4">
                                 <span class="badge badge-warning">En Evaluación</span>

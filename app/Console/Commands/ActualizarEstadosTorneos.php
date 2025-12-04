@@ -73,18 +73,20 @@ class ActualizarEstadosTorneos extends Command
             return 'Próximo';
         }
 
-        // 2. Inscripciones Abiertas: Durante el período de registro
-        if ($ahora->isBetween($torneo->fecha_registro_inicio, $torneo->fecha_registro_fin)) {
+        // 2. Inscripciones Abiertas: Durante el período de registro (incluye todo el día de la fecha de fin)
+        $fechaRegistroFinCompleta = Carbon::parse($torneo->fecha_registro_fin)->endOfDay();
+        if ($ahora->isBetween($torneo->fecha_registro_inicio, $fechaRegistroFinCompleta)) {
             return 'Inscripciones Abiertas';
         }
 
-        // 3. En Curso: Desde el inicio del torneo hasta su fin
-        if ($ahora->isBetween($torneo->fecha_inicio, $torneo->fecha_fin)) {
+        // 3. En Curso: Desde el inicio del torneo hasta su fin (incluye todo el día de la fecha de fin)
+        $fechaFinCompleta = Carbon::parse($torneo->fecha_fin)->endOfDay();
+        if ($ahora->isBetween($torneo->fecha_inicio, $fechaFinCompleta)) {
             return 'En Curso';
         }
 
         // 4. Evaluación: Después del fin del torneo (durante 30 días para evaluar)
-        if ($ahora->isAfter($torneo->fecha_fin) && $ahora->diffInDays($torneo->fecha_fin) <= 30) {
+        if ($ahora->isAfter($fechaFinCompleta) && $ahora->diffInDays($torneo->fecha_fin) <= 30) {
             return 'Evaluación';
         }
 
