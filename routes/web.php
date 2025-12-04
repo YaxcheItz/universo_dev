@@ -76,4 +76,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
     Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    // Descargar archivos de proyecto
+    Route::get('/proyectos/{proyecto}/files/{file}/download', [ProyectoController::class, 'download'])
+     ->name('proyectos.files.download');
+
 });
