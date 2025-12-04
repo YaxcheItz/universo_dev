@@ -57,6 +57,14 @@ class Proyecto extends Model
     }
 
     /**
+     * Archivos asociados al proyecto
+     */
+    public function archivos() 
+    { 
+        return $this->hasMany(ArchivoProyecto::class, 'proyecto_id'); 
+    }
+
+    /**
      * Usuario creador del proyecto
      */
     public function creador()
@@ -146,5 +154,13 @@ class Proyecto extends Model
     public function getEstaActivoAttribute()
     {
         return in_array($this->estado, ['En Desarrollo', 'Pruebas', 'Producción']);
+    }
+
+    /**
+     * Verificar si un usuario es el líder del proyecto
+     */
+    public function esLider(User $user)
+    {
+        return $this->equipo && $this->equipo->esLider($user);
     }
 }
