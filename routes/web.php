@@ -42,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/proyectos/{proyecto}/edit', [ProyectoController::class, 'edit'])->name('proyectos.edit');
     Route::put('/proyectos/{proyecto}', [ProyectoController::class, 'update'])->name('proyectos.update');
     Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
+    Route::post('/proyectos/{proyecto}/files', [ProyectoController::class, 'uploadFile'])->name('proyectos.files.upload');
+    Route::post('proyectos/{proyecto}/files/{file}/accept', [ProyectoController::class, 'acceptFile'])->name('proyectos.files.accept');
+    Route::post('proyectos/{proyecto}/files/{file}/reject', [ProyectoController::class, 'rejectFile'])->name('proyectos.files.reject');
+    Route::delete('proyectos/{proyecto}/files/{file}', [ProyectoController::class, 'deleteFile'])->name('proyectos.files.delete');
     
     // Torneos
     Route::get('/torneos', [TorneoController::class, 'index'])->name('torneos.index');
