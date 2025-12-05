@@ -52,9 +52,16 @@
                 <!-- User Menu -->
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('perfil.index') }}" class="flex items-center space-x-2 text-universo-text hover:text-white transition">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-universo-purple to-universo-cyan flex items-center justify-center text-white font-bold">
-                            {{ substr(auth()->user()->name, 0, 1) }}
-                        </div>
+                        @if(auth()->user()->avatar)
+                            <img
+                                src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                                alt="Foto de {{ auth()->user()->name }}"
+                                class="w-8 h-8 rounded-full object-cover border-2 border-universo-purple ring-2 ring-universo-purple/20">
+                        @else
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-universo-purple to-universo-cyan flex items-center justify-center text-white font-bold">
+                                {{ substr(auth()->user()->name, 0, 1) }}
+                            </div>
+                        @endif
                         <span class="hidden md:block">{{ auth()->user()->name }}</span>
                     </a>
 
