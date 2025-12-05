@@ -25,7 +25,7 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    
+
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
 });
@@ -36,7 +36,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Proyectos
     Route::get('/proyectos', [ProyectoController::class, 'index'])->name('proyectos.index');
     Route::get('/proyectos/create', [ProyectoController::class, 'create'])->name('proyectos.create');
@@ -49,7 +49,8 @@ Route::middleware('auth')->group(function () {
     Route::post('proyectos/{proyecto}/files/{file}/accept', [ProyectoController::class, 'acceptFile'])->name('proyectos.files.accept');
     Route::post('proyectos/{proyecto}/files/{file}/reject', [ProyectoController::class, 'rejectFile'])->name('proyectos.files.reject');
     Route::delete('proyectos/{proyecto}/files/{file}', [ProyectoController::class, 'deleteFile'])->name('proyectos.files.delete');
-    
+    Route::get('/proyectos/{proyecto}/files/{file}/download', [ProyectoController::class, 'download'])->name('proyectos.files.download');
+
     // Torneos
     Route::get('/torneos', [TorneoController::class, 'index'])->name('torneos.index');
     Route::get('/torneos/create', [TorneoController::class, 'create'])->name('torneos.create');
@@ -61,20 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/torneos/{torneo}/inscribir', [TorneoController::class, 'inscribir'])->name('torneos.inscribir');
     Route::post('/torneos/{torneo}/salir', [TorneoController::class, 'salir'])->name('torneos.salir');
     Route::get('/torneos/{torneo}/participantes', [TorneoController::class, 'participantes'])->name('torneos.participantes');
-    
-     
-    // Perfil
-    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
-    Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 
-    //Usuario
-    Route::get('/usuarios/buscar', [UserController::class, 'buscar'])
-        ->middleware('auth');
-    
-
-    // Rutas de Equipos
-    
+    // Equipos
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/create', [EquipoController::class, 'create'])->name('equipos.create');
     Route::post('/equipos', [EquipoController::class, 'store'])->name('equipos.store');
@@ -82,31 +71,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/equipos/{equipo}/edit', [EquipoController::class, 'edit'])->name('equipos.edit');
     Route::put('/equipos/{equipo}', [EquipoController::class, 'update'])->name('equipos.update');
     Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
-
-
-    // Manejar solicitudes (aceptar/rechazar)
-    Route::post('/equipos/solicitudes/{solicitud}/aceptar', [EquipoController::class, 'manejarSolicitud'])
-        ->name('equipos.solicitudes.aceptar');
-
-    Route::delete('/equipos/solicitudes/{solicitud}/rechazar', [EquipoController::class, 'manejarSolicitud'])
-        ->name('equipos.solicitudes.rechazar');
-
-
-    // Unirse, salir y manejar miembros
     Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
     Route::post('/equipos/{equipo}/salir', [EquipoController::class, 'salir'])->name('equipos.salir');
     Route::post('/equipos/{equipo}/solicitar-unirse', [EquipoController::class, 'solicitarUnirse'])->name('equipos.solicitarUnirse');
     Route::post('/equipos/{equipo}/agregar-miembro', [EquipoController::class, 'agregarMiembro'])->name('equipos.agregarMiembro');
     Route::post('/equipos/{equipo}/remover/{user}', [EquipoController::class, 'removerMiembro'])->name('equipos.removerMiembro');
-    
-    // Solicitudes de Equipo
+
+    // Solicitudes de Equipo (Magali)
+    Route::post('/equipos/{equipo}/solicitar', [EquipoController::class, 'solicitar'])->name('equipos.solicitar');
+    Route::post('/solicitudes/{solicitud}/manejar', [EquipoController::class, 'manejarSolicitud'])->name('solicitudes.manejar');
+    Route::post('/equipos/solicitudes/{solicitud}/aceptar', [EquipoController::class, 'manejarSolicitud'])->name('equipos.solicitudes.aceptar');
+    Route::delete('/equipos/solicitudes/{solicitud}/rechazar', [EquipoController::class, 'manejarSolicitud'])->name('equipos.solicitudes.rechazar');
+
+    // Solicitudes de Equipo (EquipoSolicitudController)
     Route::post('/solicitudes/{equipoSolicitud}/aceptar', [EquipoSolicitudController::class, 'aceptar'])->name('solicitudes.aceptar');
     Route::post('/solicitudes/{equipoSolicitud}/rechazar', [EquipoSolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
-    
-    //rutas solicitar-equipo Magali
-    Route::post('/equipos/{equipo}/solicitar', [EquipoController::class,'solicitar'])->name('equipos.solicitar');
-    Route::post('/solicitudes/{solicitud}/manejar', [EquipoController::class,'manejarSolicitud'])->name('solicitudes.manejar');
 
+    // Perfil
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::get('/perfil/edit', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+
+    // Usuario (búsqueda)
+    Route::get('/usuarios/buscar', [UserController::class, 'buscar'])->name('usuarios.buscar');
 
     // Evaluaciones (solo para Jueces)
     Route::get('/evaluaciones', [EvaluacionController::class, 'index'])->name('evaluaciones.index');

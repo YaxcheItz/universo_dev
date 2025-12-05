@@ -319,9 +319,14 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <a href="{{ Storage::url($file->path) }}" target="_blank" class="btn-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Descargar
+                            <a href="{{ route('proyectos.files.download', [$proyecto->id, $file->id]) }}"
+                                class="px-4 py-2 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 hover:from-blue-600/30 hover:to-cyan-600/30 text-blue-400 rounded-lg border border-blue-600/30 hover:border-blue-500 transition-all flex items-center gap-2 group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 5v10"></path>
+                                        <path d="M5 12l7 7 7-7"></path>
+                                        <path d="M5 19h14"></path>
+                                    </svg>
+                                    Descargar
                             </a>
 
                             @if($canAccept)

@@ -46,7 +46,7 @@ class ProyectoController extends Controller
             'lenguaje_principal' => 'required|string',
             'tecnologias' => 'nullable|array',
             'estado' => 'required|string',
-            'equipo_id' => 'nullable|exists:equipos,id',
+            'equipo_id' => 'required|exists:equipos,id',
         ]);
 
         $validated['user_id'] = Auth::id();
@@ -209,4 +209,22 @@ class ProyectoController extends Controller
 
         return back()->with('success', 'Archivo eliminado (rollback realizado).');
     }
+
+    public function download(Proyecto $proyecto, ArchivoProyecto $file)
+{
+    // Validar que el archivo pertenece al proyecto
+    if ($file->proyecto_id !== $proyecto->id) {
+        abort(403, 'No autorizado');
+    }
+
+    // Corregir la ruta - ya que usas el disco 'public'
+    $path = storage_path('app/public/' . $file->path);
+
+    if (!file_exists($path)) {
+        return redirect()->back()->with('error', 'El archivo no existe.');
+    }
+
+    return response()->download($path, $file->filename);
+}
+
 }
