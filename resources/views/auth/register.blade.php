@@ -123,7 +123,7 @@
                             @error('rol')<p class="mt-1 text-sm text-red-400">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-universo-text mb-2">Usuario de GitHub</label>
+                            <label class="block text-sm font-medium text-universo-text mb-2">Nombre de Usuario UniversoDev</label>
                             <input name="github_username" type="text" class="input-field" value="{{ old('github_username') }}" placeholder="tu-usuario">
                         </div>
                     </div>
