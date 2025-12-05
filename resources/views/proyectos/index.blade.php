@@ -7,7 +7,7 @@
 
     <!-- Page Header -->
     <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        <div>
+        <div >
             <h1 class="text-3xl font-bold text-universo-text mb-2">Proyectos</h1>
             <p class="text-universo-text-muted">Explora y comparte proyectos de la comunidad</p>
         </div>
@@ -56,7 +56,7 @@
             <!-- Proyecto Card con click para ver y borde degradado -->
             <div
                 class="proyecto-card relative cursor-pointer group rounded-xl p-4 transition-all duration-300 hover:scale-[1.02] bg-universo-card-bg border-2 border-universo-border"
-                onclick="window.location.href='{{ route('proyectos.show', $proyecto) }}'"
+                onclick="window.location.href='{{ route('proyectos.show', $proyecto) }}';"
             >
                 <!-- Header del Proyecto -->
                 <div class="flex items-start justify-between mb-3">
@@ -103,16 +103,7 @@
                         @endif
                     @endif
                 </div>
-                <!-- Estrellas  -->
-                <div class="flex items-center gap-4 text-sm text-universo-text-muted border-t border-universo-border pt-3">
-                    <!-- Estrellas -->
-                    <div class="flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
-                        <span>{{ number_format($proyecto->estrellas) }}</span>
-                    </div>
-                </div>
+        
             </div>
         @empty
             <div class="md:col-span-2 lg:col-span-3 text-center py-12">
