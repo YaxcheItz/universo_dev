@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Notifications\UserRegisteredNotification;
+
 
 class RegisterController extends Controller
 {
@@ -99,6 +101,8 @@ class RegisterController extends Controller
             'proyectos_completados' => 0,
             'torneos_ganados' => 0,
         ]);
+        //envia notificaion a correo
+        $user->notify(new UserRegisteredNotification());
 
         // Iniciar sesión automáticamente
         Auth::login($user);

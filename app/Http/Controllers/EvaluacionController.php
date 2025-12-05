@@ -8,6 +8,7 @@ use App\Models\Evaluacion;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\TorneoCalificado;
 
 class EvaluacionController extends Controller
 {
@@ -195,6 +196,7 @@ class EvaluacionController extends Controller
         if ($evaluacionesActuales >= $evaluacionesEsperadas) {
             $torneo->estado = 'Finalizado';
             $torneo->save();
+            event(new TorneoCalificado($torneo));// para notificaiones-POR MAGALI
         }
     }
 }

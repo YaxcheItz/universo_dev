@@ -9,6 +9,7 @@ use App\Models\EquipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SolicitudMiembro;
+use App\Events\UserGroupStatusChanged;
 
 class EquipoController extends Controller
 {
@@ -435,6 +436,8 @@ public function index(Request $request)
     public function manejarSolicitud(Request $request, SolicitudMiembro $solicitud)
     {
         $equipo = $solicitud->equipo;
+         $user = $solicitud->user;
+
 
         if ($equipo->lider_id !== Auth::id()) {
             abort(403, 'Solo el líder puede manejar solicitudes');
@@ -458,9 +461,12 @@ public function index(Request $request)
             ]);
 
             $equipo->increment('miembros_actuales');
+            event(new UserGroupStatusChanged($user, $equipo, 'accepted'));
         } else {
             $solicitud->estado = 'Rechazada';
             $solicitud->save();
+            //notificacion rechazado
+            event(new UserGroupStatusChanged($user, $equipo, 'rejected'));
         }
 
         return back()->with('success', 'Solicitud actualizada correctamente');
