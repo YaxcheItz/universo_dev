@@ -76,9 +76,9 @@
             <h2 class="text-xl font-semibold text-universo-text mb-4">Equipo de Trabajo</h2>
 
             <div>
-                <label for="equipo_id" class="block text-sm font-medium text-universo-text mb-2">Seleccionar Equipo (opcional)</label>
-                <select name="equipo_id" id="equipo_id" class="input-field">
-                    <option value="">Sin equipo (proyecto individual)</option>
+                <label for="equipo_id" class="block text-sm font-medium text-universo-text mb-2">Seleccionar Equipo * (obligatorio)</label>
+                <select name="equipo_id" id="equipo_id" class="input-field" required>
+                    <option value="">Selecciona un equipo</option>
                     @forelse($equiposLiderados as $equipo)
                         <option value="{{ $equipo->id }}" {{ old('equipo_id') == $equipo->id ? 'selected' : '' }}>
                             {{ $equipo->name }} ({{ $equipo->miembros_actuales }} miembros)
