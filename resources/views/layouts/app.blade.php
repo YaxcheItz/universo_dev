@@ -6,6 +6,18 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'UniversoDev - Plataforma de Colaboración')</title>
     
+    @php
+        $manifestPath = public_path('build/manifest.json');
+        $isProduction = app()->environment('production');
+        $assetsMissing = $isProduction && !file_exists($manifestPath);
+    @endphp
+
+    @if($assetsMissing)
+        <div style="position: fixed; top: 0; left: 0; right: 0; padding: 1rem; background-color: #f8d7da; color: #721c24; text-align: center; z-index: 9999;">
+            <strong>¡Atención!</strong> Los archivos de diseño (CSS/JS) no se encontraron. Ejecuta <code>npm run build</code> y sube la carpeta <code>public/build</code> al servidor.
+        </div>
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen">
