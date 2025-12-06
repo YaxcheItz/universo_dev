@@ -38,7 +38,7 @@ class TorneoCalificadoNotification extends Notification
                     ->subject('El torneo ha sido finalizado revisa la evaluación')
                     ->greeting('Hola ' . $notifiable->name)
                     ->line('El torneo "' . $this->torneo->name . '" ha sido calificado por todos los jueces.')
-                    ->action('Ver torneo', url('https://universodev.online/login' . $this->torneo->id))
+                    ->action('Ver torneo', route('torneos.show', $this->torneo->id))
                     ->line('¡Gracias por usar nuestra plataforma!');
     }
 }
