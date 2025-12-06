@@ -151,28 +151,31 @@
                 </div>
 
                 @php
-                    $solicitud = \App\Models\SolicitudMiembro::where('equipo_id', $equipo->id)
+                    $solicitud = \App\Models\EquipoSolicitud::where('equipo_id', $equipo->id)
                         ->where('user_id', Auth::id())->first();
                 @endphp
 
                 @if($solicitud)
-                    <div class="text-center p-3 bg-universo-dark rounded">
-                        <p class="text-universo-text font-medium">Solicitud enviada: {{ $solicitud->estado }}</p>
+                    <div class="text-center p-3 bg-universo-dark rounded space-y-3">
+                        <p class="text-universo-text font-medium">
+                            @if($solicitud->estado === 'pendiente')
+                                ✅ Solicitud enviada y en espera de revisión
+                            @elseif($solicitud->estado === 'rechazada')
+                                ❌ Tu solicitud fue rechazada.
+                            @elseif($solicitud->estado === 'aceptada')
+                                ✅ Tu solicitud fue aceptada
+                            @endif
+                        </p>
+                        @if($solicitud->estado === 'rechazada')
+                            <form action="{{ route('equipos.solicitarUnirse', $equipo) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full btn-primary">Reenviar Solicitud</button>
+                            </form>
+                        @endif
                     </div>
                 @else
-                    <form action="{{ route('equipos.solicitar', $equipo) }}" method="POST" class="space-y-3">
+                    <form action="{{ route('equipos.solicitarUnirse', $equipo) }}" method="POST" class="space-y-3">
                         @csrf
-                        <div>
-                            <label for="rol_equipo" class="block text-xs font-medium text-universo-text mb-1 uppercase tracking-wide">
-                                Selecciona tu Rol
-                            </label>
-                            <select name="rol_equipo" id="rol_equipo" class="input-field" required>
-                                <option value="" disabled selected>Elige un rol...</option>
-                                @foreach($rolesDisponibles as $rol)
-                                    <option value="{{ $rol }}">{{ $rol }}</option>
-                                @endforeach
-                            </select>
-                        </div>
                         <button type="submit" class="w-full btn-primary">Enviar Solicitud</button>
                     </form>
                 @endif

@@ -420,6 +420,27 @@ public function index(Request $request)
             'rol_equipo' => 'required|string'
         ]);
 
+        // Buscar si existe una solicitud previa
+        $solicitudExistente = SolicitudMiembro::where('user_id', Auth::id())
+            ->where('equipo_id', $equipo->id)
+            ->first();
+
+        // Si ya hay una solicitud pendiente, no permitir enviar otra
+        if ($solicitudExistente && strtolower($solicitudExistente->estado) === 'pendiente') {
+            return back()->with('error', 'Ya has enviado una solicitud a este equipo. Por favor, espera a que el líder la revise.');
+        }
+
+        // Si la solicitud fue rechazada, permitir reenviarla actualizando el estado
+        if ($solicitudExistente && strtolower($solicitudExistente->estado) === 'rechazada') {
+            $solicitudExistente->estado = 'Pendiente';
+            $solicitudExistente->rol_equipo = $request->rol_equipo;
+            $solicitudExistente->updated_at = now();
+            $solicitudExistente->save();
+
+            return back()->with('success', 'Tu solicitud ha sido reenviada al líder del equipo.');
+        }
+
+        // Crear una nueva solicitud
         SolicitudMiembro::create([
             'equipo_id' => $equipo->id,
             'user_id' => Auth::id(),
@@ -461,11 +482,12 @@ public function index(Request $request)
             ]);
 
             $equipo->increment('miembros_actuales');
+            // Disparar evento de notificación
             event(new UserGroupStatusChanged($user, $equipo, 'accepted'));
         } else {
             $solicitud->estado = 'Rechazada';
             $solicitud->save();
-            //notificacion rechazado
+            // Disparar evento de notificación
             event(new UserGroupStatusChanged($user, $equipo, 'rejected'));
         }
 
@@ -560,20 +582,30 @@ public function index(Request $request)
             return back()->with('error', 'Ya eres miembro de este equipo.');
         }
 
-        // Validar que no exista ya una solicitud pendiente
+        // Buscar si existe una solicitud previa
         $solicitudExistente = EquipoSolicitud::where('user_id', $user->id)
             ->where('equipo_id', $equipo->id)
-            ->where('estado', 'pendiente')
-            ->exists();
+            ->first();
 
-        if ($solicitudExistente) {
+        // Si ya hay una solicitud pendiente, no permitir enviar otra
+        if ($solicitudExistente && $solicitudExistente->estado === 'pendiente') {
             return back()->with('error', 'Ya has enviado una solicitud a este equipo. Por favor, espera a que el líder la revise.');
         }
 
-        // Crear la solicitud
+        // Si la solicitud fue rechazada, permitir reenviarla actualizando el estado
+        if ($solicitudExistente && $solicitudExistente->estado === 'rechazada') {
+            $solicitudExistente->estado = 'pendiente';
+            $solicitudExistente->updated_at = now();
+            $solicitudExistente->save();
+
+            return back()->with('success', 'Tu solicitud ha sido reenviada al equipo.');
+        }
+
+        // Crear una nueva solicitud
         EquipoSolicitud::create([
             'user_id' => $user->id,
             'equipo_id' => $equipo->id,
+            'estado' => 'pendiente',
         ]);
 
         return back()->with('success', 'Tu solicitud para unirte al equipo ha sido enviada.');

@@ -71,15 +71,16 @@ class EquipoSolicitudController extends Controller
             abort(403, 'No tienes permiso para rechazar solicitudes para este equipo.');
         }
 
-        // 2. Obtener datos antes de eliminar
+        // 2. Obtener datos antes de actualizar
         $usuario = $equipoSolicitud->usuario;
         $equipo = $equipoSolicitud->equipo;
 
-        // 3. Disparar evento de notificación
-        event(new UserGroupStatusChanged($usuario, $equipo, 'rejected'));
+        // 3. Cambiar estado a rechazada (no eliminar para permitir reenvío)
+        $equipoSolicitud->estado = 'rechazada';
+        $equipoSolicitud->save();
 
-        // 4. Eliminar la solicitud
-        $equipoSolicitud->delete();
+        // 4. Disparar evento de notificación
+        event(new UserGroupStatusChanged($usuario, $equipo, 'rejected'));
 
         return back()->with('success', 'Solicitud rechazada.');
     }
