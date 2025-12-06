@@ -7,6 +7,7 @@ use App\Models\EquipoMiembro;
 use App\Models\Equipo; // For updating miembros_actuales
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\UserGroupStatusChanged;
 
 class EquipoSolicitudController extends Controller
 {
@@ -51,7 +52,10 @@ class EquipoSolicitudController extends Controller
         // 6. Incrementar el contador de miembros del equipo
         $equipo->increment('miembros_actuales');
 
-        // 7. Eliminar la solicitud
+        // 7. Disparar evento de notificación
+        event(new UserGroupStatusChanged($usuario, $equipo, 'accepted'));
+
+        // 8. Eliminar la solicitud
         $equipoSolicitud->delete();
 
         return back()->with('success', 'Solicitud aceptada. El usuario ha sido añadido al equipo.');
@@ -66,8 +70,15 @@ class EquipoSolicitudController extends Controller
         if (Auth::id() !== $equipoSolicitud->equipo->lider_id) {
             abort(403, 'No tienes permiso para rechazar solicitudes para este equipo.');
         }
-        
-        // 2. Eliminar la solicitud
+
+        // 2. Obtener datos antes de eliminar
+        $usuario = $equipoSolicitud->usuario;
+        $equipo = $equipoSolicitud->equipo;
+
+        // 3. Disparar evento de notificación
+        event(new UserGroupStatusChanged($usuario, $equipo, 'rejected'));
+
+        // 4. Eliminar la solicitud
         $equipoSolicitud->delete();
 
         return back()->with('success', 'Solicitud rechazada.');

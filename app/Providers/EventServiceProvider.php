@@ -15,6 +15,9 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\TorneoCalificado::class => [
             \App\Listeners\SendTorneoCalificadoNotification::class,
         ],
+        \App\Events\UserGroupStatusChanged::class => [
+            \App\Listeners\SendGroupStatusNotification::class,
+        ],
     ];
 
 
