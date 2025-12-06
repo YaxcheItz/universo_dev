@@ -196,7 +196,30 @@ class EvaluacionController extends Controller
         if ($evaluacionesActuales >= $evaluacionesEsperadas) {
             $torneo->estado = 'Finalizado';
             $torneo->save();
+
+            // Actualizar las posiciones de los equipos según su puntaje
+            $this->actualizarPosiciones($torneo);
+
             event(new TorneoCalificado($torneo));// para notificaiones-POR MAGALI
+        }
+    }
+
+    /**
+     * Actualizar las posiciones de los equipos según su puntaje final
+     */
+    private function actualizarPosiciones(Torneo $torneo)
+    {
+        // Obtener todas las participaciones ordenadas por puntaje (mayor a menor)
+        $participaciones = $torneo->participaciones()
+            ->orderBy('puntaje_total', 'desc')
+            ->get();
+
+        // Asignar posiciones
+        $posicion = 1;
+        foreach ($participaciones as $participacion) {
+            $participacion->posicion = $posicion;
+            $participacion->save();
+            $posicion++;
         }
     }
 }

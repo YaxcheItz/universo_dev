@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TorneoController;
@@ -94,6 +95,9 @@ Route::middleware('auth')->group(function () {
 
     // Usuario (búsqueda)
     Route::get('/usuarios/buscar', [UserController::class, 'buscar'])->name('usuarios.buscar');
+
+    // Certificados
+    Route::get('/torneos/{torneo}/certificado/{participacion}', [CertificadoController::class, 'descargar'])->name('certificados.descargar');
 
     // Evaluaciones (solo para Jueces)
     Route::get('/evaluaciones', [EvaluacionController::class, 'index'])->name('evaluaciones.index');
