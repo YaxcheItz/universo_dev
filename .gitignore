@@ -3,6 +3,9 @@
 .env
 .env.backup
 .env.production
+.env.hostinger
+.env.local
+.env.staging
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -22,3 +25,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+verificar-hostinger.php
+*.pem
+*.key
+*.crt

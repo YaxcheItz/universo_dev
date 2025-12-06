@@ -17,23 +17,35 @@ class SendTorneoCalificadoNotification implements ShouldQueue
     public function handle(TorneoCalificado $event): void
     {
         $torneo = $event->torneo;
-
-        // Notificar al organizador
         $organizador = $torneo->organizador;
+
+        // Recopilar todos los usuarios únicos que deben ser notificados
+        $usuariosANotificar = collect();
+
+        // Agregar organizador
         if ($organizador) {
-            $organizador->notify(new TorneoCalificadoNotification($torneo));
+            $usuariosANotificar->push($organizador);
         }
 
-        // Notificar a todos los participantes (miembros de equipos inscritos)
-        $equipos = $torneo->equipos; // Obtener todos los equipos del torneo
+        // Obtener todos los equipos del torneo
+        $equipos = $torneo->equipos;
 
+        // Agregar líderes y miembros de equipos participantes
         foreach ($equipos as $equipo) {
-            // Obtener todos los miembros de cada equipo
-            $miembros = $equipo->miembros;
+            // Agregar líder del equipo
+            if ($equipo->lider) {
+                $usuariosANotificar->push($equipo->lider);
+            }
 
-            foreach ($miembros as $miembro) {
-                $miembro->notify(new TorneoCalificadoNotification($torneo));
+            // Agregar todos los miembros del equipo
+            foreach ($equipo->miembros as $miembro) {
+                $usuariosANotificar->push($miembro);
             }
         }
+
+        // Eliminar usuarios duplicados por ID y notificar a cada uno una sola vez
+        $usuariosANotificar->unique('id')->each(function ($usuario) use ($torneo) {
+            $usuario->notify(new TorneoCalificadoNotification($torneo));
+        });
     }
 }
