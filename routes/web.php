@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\TorneoController;
 use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EquipoSolicitudController;
 use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\PerfilController;
@@ -104,4 +105,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/evaluaciones/{torneo}', [EvaluacionController::class, 'show'])->name('evaluaciones.show');
     Route::get('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'create'])->name('evaluaciones.create');
     Route::post('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'store'])->name('evaluaciones.store');
+});
+
+//rutas para administracion
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    
+    // Crear Juez
+    Route::get('/crear-juez', [AdminController::class, 'crearJuez'])->name('crear-juez');
+    Route::post('/crear-juez', [AdminController::class, 'storeJuez'])->name('store-juez');
+    
+    // Crear Usuario
+    Route::get('/crear-usuario', [AdminController::class, 'crearUsuario'])->name('crear-usuario');
+    Route::post('/crear-usuario', [AdminController::class, 'storeUsuario'])->name('store-usuario');
+    
+    // Eliminar Usuario
+    Route::delete('/eliminar-usuario/{id}', [AdminController::class, 'eliminarUsuario'])->name('eliminar-usuario');
 });
