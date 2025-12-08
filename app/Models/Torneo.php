@@ -48,8 +48,6 @@ class Torneo extends Model
         'participantes_actuales' => 'integer',
     ];
 
-    // ==================== RELACIONES ====================
-
     /**
      * Organizador del torneo
      */
@@ -75,9 +73,15 @@ class Torneo extends Model
             ->withPivot('fecha_inscripcion', 'estado', 'puntaje_total', 'posicion', 'premio_ganado')
             ->withTimestamps();
     }
+    //Jueces asignados al torneo- para panel de administracion
+    public function jueces()
+    {
+        return $this->belongsToMany(User::class, 'juez_torneo', 'torneo_id', 'juez_id')
+            ->withTimestamps()
+            ->withPivot('fecha_asignacion');
+    }
 
-    // ==================== SCOPES ====================
-
+   
     /**
      * Torneos activos (inscripciones abiertas o en curso)
      */

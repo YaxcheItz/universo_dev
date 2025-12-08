@@ -107,7 +107,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/evaluaciones/{participacion}/evaluar', [EvaluacionController::class, 'store'])->name('evaluaciones.store');
 });
 
-//rutas para administracion
+//rutas para administrador
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
     
@@ -121,4 +121,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     
     // Eliminar Usuario
     Route::delete('/eliminar-usuario/{id}', [AdminController::class, 'eliminarUsuario'])->name('eliminar-usuario');
+    
+    // Asignar Jueces a Torneos
+    Route::get('/asignar-jueces', [AdminController::class, 'asignarJueces'])->name('asignar-jueces');
+    Route::post('/asignar-jueces', [AdminController::class, 'storeAsignacionJueces'])->name('store-asignacion-jueces');
+    Route::delete('/remover-juez-torneo', [AdminController::class, 'removerJuezTorneo'])->name('remover-juez-torneo');
 });

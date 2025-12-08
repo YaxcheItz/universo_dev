@@ -144,4 +144,20 @@ class User extends Authenticatable
     {
         return $query->whereNull('deleted_at');
     }
+    /**
+     * Verificar si el usuario es juez
+     */
+    public function esJuez()
+    {
+        return $this->rol === 'Juez';
+    }
+
+    /**
+     * Verificar si el usuario es administrador
+     */
+    public function esAdministrador()
+    {
+        return $this->rol === 'Administrador';
+    }
+    
 }

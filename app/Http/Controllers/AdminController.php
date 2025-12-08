@@ -11,17 +11,14 @@ class AdminController extends Controller
 {
     // Roles predefinidos
     private $rolesPredefinidos = [
-            'Programador Frontend',
-            'Programador Backend',
-            'Full-Stack',
-            'Android',
-            'iOS',
-            'DevOps',
-            'Data Scientist',
-            'ML Engineer',
-            'QA Engineer',
-            'UI/UX Designer',
-            'Product Manager'
+        'Desarrollador Frontend',
+        'Desarrollador Backend',
+        'Desarrollador Full Stack',
+        'Diseñador UI/UX',
+        'DevOps',
+        'QA Tester',
+        'Project Manager',
+        'Data Scientist'
     ];
 
     public function index()
@@ -133,5 +130,82 @@ class AdminController extends Controller
 
         return redirect()->route('admin.index')
             ->with('success', 'Usuario eliminado exitosamente');
+    }
+
+    /**
+     * Mostrar formulario para asignar jueces a torneos
+     */
+    public function asignarJueces()
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $torneos = \App\Models\Torneo::with(['organizador', 'jueces'])
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
+
+        $jueces = User::where('rol', 'Juez')->get();
+
+        return view('admin.asignar-jueces', compact('torneos', 'jueces'));
+    }
+
+    /**
+     * Asignar jueces a un torneo específico
+     */
+    public function storeAsignacionJueces(Request $request)
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $request->validate([
+            'torneo_id' => 'required|exists:torneos,id',
+            'jueces' => 'nullable|array', // Cambiado a nullable para permitir eliminar todos
+            'jueces.*' => 'exists:users,id',
+        ]);
+
+        $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
+
+        // Si no se envió el array de jueces o está vacío, desvincular todos
+        if (!$request->has('jueces') || empty($request->jueces)) {
+            $torneo->jueces()->detach(); // Elimina todos los jueces
+            return back()->with('success', 'Todos los jueces han sido removidos del torneo');
+        }
+
+        // Verificar que todos los IDs correspondan a jueces válidos
+        $juecesValidos = User::whereIn('id', $request->jueces)
+            ->where('rol', 'Juez')
+            ->pluck('id')
+            ->toArray();
+
+        if (count($juecesValidos) !== count($request->jueces)) {
+            return back()->with('error', 'Algunos de los usuarios seleccionados no son jueces válidos');
+        }
+
+        // Sincronizar jueces (elimina los no seleccionados y agrega los nuevos)
+        $torneo->jueces()->sync($juecesValidos);
+
+        return back()->with('success', 'Jueces asignados exitosamente al torneo');
+    }
+
+    /**
+     * Eliminar un juez específico de un torneo
+     */
+    public function removerJuezTorneo(Request $request)
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $request->validate([
+            'torneo_id' => 'required|exists:torneos,id',
+            'juez_id' => 'required|exists:users,id',
+        ]);
+
+        $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
+        $torneo->jueces()->detach($request->juez_id);
+
+        return back()->with('success', 'Juez removido del torneo exitosamente');
     }
 }
