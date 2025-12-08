@@ -17,12 +17,17 @@ class EvaluacionController extends Controller
      */
     public function index()
     {
-        // Verificar que el usuario sea juez
-        if (Auth::user()->rol !== 'Juez') {
-            abort(403, 'Solo los jueces tienen acceso a esta sección');
+        $user = Auth::user();
+        
+        if (!$user->esJuez()) {
+            abort(403, 'Solo los jueces pueden acceder a esta sección');
         }
 
+        // Obtener torneos en evaluación donde el usuario está asignado como juez
         $torneos = Torneo::where('estado', 'Evaluación')
+            ->whereHas('jueces', function ($q) use ($user) {
+                $q->where('users.id', $user->id);
+            })
             ->with('organizador')
             ->orderBy('fecha_fin', 'desc')
             ->get();
@@ -35,12 +40,10 @@ class EvaluacionController extends Controller
      */
     public function show(Torneo $torneo)
     {
-        // Verificar que el usuario sea juez
-        if (Auth::user()->rol !== 'Juez') {
-            abort(403, 'Solo los jueces tienen acceso a esta sección');
+        if (!$this->estaAsignadoComoJuez($torneo)) {
+            abort(403, 'No estás asignado como juez en este torneo');
         }
 
-        // Verificar que el torneo esté en evaluación
         if ($torneo->estado !== 'Evaluación') {
             return redirect()->route('evaluaciones.index')
                 ->with('error', 'Este torneo no está en evaluación');
@@ -50,29 +53,34 @@ class EvaluacionController extends Controller
             ->with(['equipo.lider', 'equipo.miembros', 'proyecto', 'evaluaciones.juez'])
             ->get();
 
-        // Verificar qué participaciones ya fueron evaluadas por este juez
         $juezId = Auth::id();
+
         $participaciones = $participaciones->map(function ($participacion) use ($juezId) {
             $participacion->evaluada_por_juez = $participacion->evaluaciones
                 ->where('juez_id', $juezId)
                 ->isNotEmpty();
+
             $participacion->evaluacion_juez = $participacion->evaluaciones
                 ->where('juez_id', $juezId)
                 ->first();
+
             return $participacion;
         });
 
-        return view('evaluaciones.show', compact('torneo', 'participaciones'));
+        return view('evaluaciones.show', compact(
+            'torneo',
+            'participaciones',
+            'juezId'
+        ));
     }
 
     /**
      * Mostrar formulario de evaluación para una participación
      */
     public function create(TorneoParticipacion $participacion)
-    {
-        // Verificar que el usuario sea juez
-        if (Auth::user()->rol !== 'Juez') {
-            abort(403, 'Solo los jueces tienen acceso a esta sección');
+    {  
+        if (!$this->estaAsignadoComoJuez($participacion->torneo)) {
+            abort(403, 'No puedes evaluar este torneo');
         }
 
         $participacion->load(['torneo', 'equipo.miembros', 'proyecto']);
@@ -103,9 +111,8 @@ class EvaluacionController extends Controller
      */
     public function store(Request $request, TorneoParticipacion $participacion)
     {
-        // Verificar que el usuario sea juez
-        if (Auth::user()->rol !== 'Juez') {
-            abort(403, 'Solo los jueces tienen acceso a esta sección');
+        if (!$this->estaAsignadoComoJuez($participacion->torneo)) {
+            abort(403, 'No puedes evaluar este torneo');
         }
 
         // Verificar que el torneo esté en evaluación
@@ -170,21 +177,23 @@ class EvaluacionController extends Controller
      */
     private function verificarFinalizacionTorneo(Torneo $torneo)
     {
-        // Obtener total de jueces en el sistema
-        $totalJueces = User::where('rol', 'Juez')->count();
+        // CAMBIO IMPORTANTE: Obtener jueces ASIGNADOS al torneo (no todos los jueces del sistema)
+        $totalJueces = $torneo->jueces()->count();
 
         if ($totalJueces == 0) {
-            return; // No hay jueces, no se puede finalizar
+            // No hay jueces asignados, no se puede finalizar automáticamente
+            return;
         }
 
         // Obtener total de participaciones del torneo
         $totalParticipaciones = $torneo->participaciones()->count();
 
         if ($totalParticipaciones == 0) {
-            return; // No hay participaciones, no se puede finalizar
+            // No hay participaciones, no se puede finalizar
+            return;
         }
 
-        // Total de evaluaciones que deberían existir (jueces * participaciones)
+        // Total de evaluaciones que deberían existir (jueces asignados * participaciones)
         $evaluacionesEsperadas = $totalJueces * $totalParticipaciones;
 
         // Total de evaluaciones actuales del torneo
@@ -200,7 +209,8 @@ class EvaluacionController extends Controller
             // Actualizar las posiciones de los equipos según su puntaje
             $this->actualizarPosiciones($torneo);
 
-            event(new TorneoCalificado($torneo));// para notificaiones-POR MAGALI
+            // Disparar evento para notificaciones
+            event(new TorneoCalificado($torneo));
         }
     }
 
@@ -221,5 +231,15 @@ class EvaluacionController extends Controller
             $participacion->save();
             $posicion++;
         }
+    }
+
+    /**
+     * Verificar si el usuario actual está asignado como juez en el torneo
+     */
+    private function estaAsignadoComoJuez(Torneo $torneo): bool
+    {
+        return $torneo->jueces()
+            ->where('users.id', Auth::id())
+            ->exists();
     }
 }

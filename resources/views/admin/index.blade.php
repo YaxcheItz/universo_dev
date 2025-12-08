@@ -49,14 +49,27 @@
 
         <div class="bg-universo-secondary border border-universo-border rounded-lg p-6">
             <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-universo-text-muted text-sm">Acciones </p>
-                    <div class="flex gap-2 mt-3">
-                        <a href="{{ route('admin.crear-usuario') }}" class="px-3 py-1.5 bg-universo-purple hover:bg-universo-purple/80 text-white text-sm rounded-lg transition">
-                            + Usuario
-                        </a>
-                        <a href="{{ route('admin.crear-juez') }}" class="px-3 py-1.5 bg-universo-cyan hover:bg-universo-cyan/80 text-white text-sm rounded-lg transition">
-                            + Juez
+                <div class="w-full">
+                    <p class="text-universo-text-muted text-sm mb-3">Acciones Rápidas</p>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-2">
+                            <a href="{{ route('admin.crear-usuario') }}" class="flex-1 px-3 py-1.5 bg-universo-purple hover:bg-universo-purple/80 text-white text-sm rounded-lg transition text-center">
+                                + Usuario
+                            </a>
+                            <a href="{{ route('admin.crear-juez') }}" class="flex-1 px-3 py-1.5 bg-universo-cyan hover:bg-universo-cyan/80 text-white text-sm rounded-lg transition text-center">
+                                + Juez
+                            </a>
+                        </div>
+                        <a href="{{ route('admin.asignar-jueces') }}" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition text-center flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                <path d="M4 22h16"></path>
+                                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+                            </svg>
+                            Asignar Jueces
                         </a>
                     </div>
                 </div>

@@ -23,7 +23,7 @@ class TorneoFactory extends Factory
         $estados = ['Próximo', 'Inscripciones Abiertas', 'En Curso', 'Evaluación', 'Finalizado'];
 
         return [
-            'nombre' => 'Hackathon ' . $this->faker->city . ' ' . $this->faker->year(),
+            'name' => 'Hackathon ' . $this->faker->city . ' ' . $this->faker->year(),
             'descripcion' => $this->faker->paragraph(4),
             'user_id' => User::factory(),
             'categoria' => $this->faker->randomElement($categorias),

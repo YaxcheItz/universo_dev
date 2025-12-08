@@ -103,7 +103,8 @@
 
                         <!-- Evaluaciones de Otros Jueces -->
                         @php
-                            $evaluacionesOtrosJueces = $participacion->evaluaciones->where('juez_id', '!=', Auth::id());
+                            $evaluacionesOtrosJueces = $participacion->evaluaciones->where('juez_id', '!=', $juezId);
+
                         @endphp
 
                         @if($evaluacionesOtrosJueces->count() > 0)
