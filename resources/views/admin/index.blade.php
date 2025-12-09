@@ -71,6 +71,14 @@
                             </svg>
                             Asignar Jueces
                         </a>
+                        <a href="{{ route('admin.reportes') }}" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition text-center flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            Ver Reportes
+                        </a>
                     </div>
                 </div>
             </div>
