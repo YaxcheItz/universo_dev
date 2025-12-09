@@ -4,41 +4,14 @@ namespace App\Listeners;
 
 use App\Events\TorneoCalificado;
 use App\Notifications\TorneoCalificadoNotification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Queue\InteractsWithQueue;
 
-class SendTorneoCalificadoNotification implements ShouldQueue, ShouldBeUnique
+class SendTorneoCalificadoNotification
 {
-    use InteractsWithQueue;
-
-    /**
-     * The number of seconds after which the job's unique lock will be released.
-     *
-     * @var int
-     */
-    public $uniqueFor = 3600;
-
-    /**
-     * Get the unique ID for the job.
-     */
-    public function uniqueId(): string
-    {
-        return 'torneo-calificado-'.$this->event->torneo->id;
-    }
-
-    /**
-     * Store the event for unique ID generation.
-     */
-    private $event;
-
     /**
      * Handle the event.
      */
     public function handle(TorneoCalificado $event): void
     {
-        // Guardar evento para uniqueId
-        $this->event = $event;
 
         $torneo = $event->torneo;
         $organizador = $torneo->organizador;
