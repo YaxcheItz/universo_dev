@@ -59,11 +59,11 @@
 
         /* Header */
         .header {
-            margin-bottom: 5mm;
+            margin-bottom: 3mm;
         }
 
         .logo {
-            font-size: 28pt;
+            font-size: 24pt;
             font-weight: bold;
             color: #FFD700;
             margin: 0;
@@ -71,40 +71,40 @@
         }
 
         .titulo {
-            font-size: 42pt;
+            font-size: 36pt;
             font-weight: bold;
             color: #FFD700;
             text-transform: uppercase;
-            letter-spacing: 8px;
-            margin: 2mm 0;
+            letter-spacing: 6px;
+            margin: 1mm 0;
             padding: 0;
         }
 
         .linea-divisora {
-            width: 180px;
+            width: 150px;
             height: 2px;
             background-color: #FFD700;
-            margin: 3mm auto;
+            margin: 2mm auto;
         }
 
         /* Texto principal */
         .subtitulo {
-            font-size: 13pt;
+            font-size: 11pt;
             color: white;
-            margin: 3mm 0;
+            margin: 2mm 0;
             text-transform: uppercase;
         }
 
         .nombre-box {
             background-color: rgba(255, 215, 0, 0.15);
             border: 2px solid #FFD700;
-            padding: 8px 25px;
+            padding: 6px 20px;
             display: inline-block;
-            margin: 5mm 0;
+            margin: 3mm 0;
         }
 
         .nombre-usuario {
-            font-size: 26pt;
+            font-size: 22pt;
             font-weight: bold;
             color: white;
             margin: 0;
@@ -112,83 +112,111 @@
 
         /* Medalla y reconocimiento */
         .medalla-seccion {
-            margin: 5mm 0;
+            margin: 3mm 0;
         }
 
         .medalla {
-            font-size: 50pt;
-            line-height: 1;
-            margin: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26pt;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .medalla-oro {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .medalla-plata {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+            color: #4A4A4A;
+            border: 4px solid #E0E0E0;
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.5);
+        }
+
+        .medalla-bronce {
+            background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+            color: #3E2723;
+            border: 4px solid #D4A574;
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.5);
         }
 
         .lugar {
-            font-size: 30pt;
+            font-size: 24pt;
             font-weight: bold;
             color: #FFD700;
             text-transform: uppercase;
-            margin: 2mm 0;
+            margin: 1mm 0;
         }
 
         .badge {
             background-color: rgba(255, 215, 0, 0.2);
             border: 1px solid #FFD700;
             color: #FFD700;
-            padding: 3px 12px;
+            padding: 2px 10px;
             display: inline-block;
-            font-size: 9pt;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
-            margin-top: 2mm;
+            margin-top: 1mm;
         }
 
         /* Información del torneo */
         .info-texto {
-            font-size: 12pt;
+            font-size: 10pt;
             color: white;
-            margin: 3mm 0;
+            margin: 1.5mm 0;
         }
 
         .equipo-nombre {
-            font-size: 20pt;
+            font-size: 16pt;
             font-weight: bold;
             color: #FFD700;
-            margin: 3mm 0;
+            margin: 1.5mm 0;
         }
 
         .torneo-nombre {
-            font-size: 18pt;
+            font-size: 15pt;
             font-weight: bold;
             color: white;
             font-style: italic;
-            margin: 3mm 0;
+            margin: 1.5mm 0;
         }
 
         /* Estadísticas - usando tabla simple */
         .stats-table {
-            width: 450px;
-            margin: 5mm auto;
+            width: 380px;
+            margin: 3mm auto;
             border-collapse: separate;
-            border-spacing: 10px 0;
+            border-spacing: 8px 0;
         }
 
         .stats-table td {
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             width: 33.33%;
         }
 
         .stat-label {
-            font-size: 8pt;
+            font-size: 7pt;
             color: rgba(255, 255, 255, 0.8);
             text-transform: uppercase;
             display: block;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .stat-value {
-            font-size: 18pt;
+            font-size: 14pt;
             font-weight: bold;
             color: #FFD700;
             display: block;
@@ -196,25 +224,25 @@
 
         /* Footer */
         .footer {
-            margin-top: 5mm;
+            margin-top: 3mm;
         }
 
         .fecha-texto {
-            font-size: 9pt;
+            font-size: 8pt;
             color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm;
         }
 
         .fecha-valor {
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: bold;
             color: white;
-            margin-bottom: 4mm;
+            margin-bottom: 2mm;
         }
 
         /* Firmas - tabla simple */
         .firmas-table {
-            width: 500px;
+            width: 420px;
             margin: 0 auto;
             border-collapse: collapse;
         }
@@ -222,25 +250,25 @@
         .firmas-table td {
             width: 50%;
             text-align: center;
-            padding: 0 15px;
+            padding: 0 12px;
         }
 
         .firma-linea {
-            width: 140px;
+            width: 120px;
             height: 1px;
             background-color: rgba(255, 255, 255, 0.6);
-            margin: 0 auto 3px;
+            margin: 0 auto 2px;
         }
 
         .firma-nombre {
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: bold;
             color: white;
-            margin: 2px 0;
+            margin: 1px 0;
         }
 
         .firma-cargo {
-            font-size: 8pt;
+            font-size: 7pt;
             color: rgba(255, 255, 255, 0.7);
             text-transform: uppercase;
         }
@@ -248,31 +276,33 @@
         /* Sello */
         .sello {
             position: absolute;
-            bottom: 20mm;
-            right: 25mm;
-            width: 70px;
-            height: 70px;
-            border: 3px solid #FFD700;
-            border-radius: 35px;
+            bottom: 18mm;
+            right: 22mm;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #FFD700;
+            border-radius: 30px;
             background-color: rgba(255, 215, 0, 0.1);
             text-align: center;
-            padding-top: 12px;
+            padding-top: 10px;
         }
 
         .sello-check {
-            font-size: 22pt;
+            font-size: 24pt;
+            font-weight: bold;
             color: #FFD700;
             line-height: 1;
             margin: 0;
+            font-family: Arial, sans-serif;
         }
 
         .sello-texto {
-            font-size: 7pt;
+            font-size: 6pt;
             font-weight: bold;
             color: #FFD700;
             text-transform: uppercase;
-            line-height: 1.2;
-            margin-top: 2px;
+            line-height: 1.1;
+            margin-top: 1px;
         }
 
         /* Código */
@@ -355,15 +385,15 @@
             <!-- Medalla y lugar -->
             <div class="medalla-seccion">
                 @if($participacion->posicion == 1)
-                    <div class="medalla">🥇</div>
+                    <div class="medalla medalla-oro">1</div>
                     <div class="lugar">PRIMER LUGAR</div>
                     <div class="badge">★ Excelencia en Programación ★</div>
                 @elseif($participacion->posicion == 2)
-                    <div class="medalla">🥈</div>
+                    <div class="medalla medalla-plata">2</div>
                     <div class="lugar">SEGUNDO LUGAR</div>
                     <div class="badge">★ Destacada Participación ★</div>
                 @elseif($participacion->posicion == 3)
-                    <div class="medalla">🥉</div>
+                    <div class="medalla medalla-bronce">3</div>
                     <div class="lugar">TERCER LUGAR</div>
                     <div class="badge">★ Mérito en Desarrollo ★</div>
                 @endif
@@ -418,7 +448,7 @@
 
         <!-- Sello -->
         <div class="sello">
-            <div class="sello-check">✓</div>
+            <div class="sello-check">&check;</div>
             <div class="sello-texto">CERTIFICADO<br>OFICIAL<br>{{ date('Y') }}</div>
         </div>
 
