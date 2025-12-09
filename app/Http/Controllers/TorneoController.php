@@ -106,6 +106,11 @@ class TorneoController extends Controller
      */
     public function create()
     {
+        // Solo los administradores pueden crear torneos
+        if (Auth::user()->rol !== 'Administrador') {
+            abort(403, 'Solo los administradores pueden crear torneos');
+        }
+
         $categorias = ['Frontend', 'Backend', 'Full-Stack', 'Mobile', 'DevOps', 'Data Science', 'Machine Learning', 'Game Development', 'Blockchain', 'IoT', 'Ciberseguridad'];
         $dominios = ['Web', 'Mobile', 'Desktop', 'Cloud', 'Embedded', 'AI/ML', 'Blockchain'];
         $niveles = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
@@ -119,6 +124,11 @@ class TorneoController extends Controller
      */
     public function store(Request $request)
     {
+        // Solo los administradores pueden crear torneos
+        if (Auth::user()->rol !== 'Administrador') {
+            abort(403, 'Solo los administradores pueden crear torneos');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'descripcion' => 'required|string',

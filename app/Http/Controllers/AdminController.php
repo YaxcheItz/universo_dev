@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Torneo;
+use App\Models\Evaluacion;
+use App\Models\TorneoParticipacion;
 use App\Notifications\UserAccountNotification;
 use App\Notifications\JudgeTournamentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -237,5 +242,238 @@ class AdminController extends Controller
         $juez->notify(new JudgeTournamentNotification($juez, $torneo, auth()->user(), 'removido'));
 
         return back()->with('success', 'Juez removido del torneo. Se ha enviado un correo de notificación.');
+    }
+
+    /**
+     * Mostrar página de reportes
+     */
+    public function reportes()
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        return view('admin.reportes');
+    }
+
+    /**
+     * Generar reporte general del sistema
+     */
+    public function reporteGeneral()
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        // Estadísticas generales
+        $totalUsuarios = User::count();
+        $totalJueces = User::where('rol', 'Juez')->count();
+        $totalAdministradores = User::where('rol', 'Administrador')->count();
+        $totalDesarrolladores = User::whereIn('rol', [
+            'Desarrollador Frontend',
+            'Desarrollador Backend',
+            'Desarrollador Full Stack',
+            'Desarrollador'
+        ])->count();
+
+        // Torneos
+        $totalTorneos = Torneo::count();
+        $torneosActivos = Torneo::whereIn('estado', ['Inscripciones Abiertas', 'En Curso'])->count();
+        $torneosFinalizados = Torneo::where('estado', 'Finalizado')->count();
+        $totalParticipaciones = TorneoParticipacion::count();
+
+        // Evaluaciones
+        $totalEvaluaciones = Evaluacion::count();
+        $evaluacionesPendientes = TorneoParticipacion::whereDoesntHave('evaluaciones')->count();
+
+        // Usuarios por rol
+        $usuariosPorRol = User::select('rol', DB::raw('count(*) as total'))
+            ->groupBy('rol')
+            ->orderBy('total', 'desc')
+            ->get();
+
+        // Torneos por estado
+        $torneosPorEstado = Torneo::select('estado', DB::raw('count(*) as total'))
+            ->groupBy('estado')
+            ->get();
+
+        // Top 10 usuarios con más puntos
+        $topUsuarios = User::orderBy('puntos_total', 'desc')
+            ->limit(10)
+            ->get(['name', 'email', 'rol', 'puntos_total', 'torneos_ganados', 'proyectos_completados']);
+
+        // Torneos recientes
+        $torneosRecientes = Torneo::with('organizador')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('admin.reporte-general', compact(
+            'totalUsuarios',
+            'totalJueces',
+            'totalAdministradores',
+            'totalDesarrolladores',
+            'totalTorneos',
+            'torneosActivos',
+            'torneosFinalizados',
+            'totalParticipaciones',
+            'totalEvaluaciones',
+            'evaluacionesPendientes',
+            'usuariosPorRol',
+            'torneosPorEstado',
+            'topUsuarios',
+            'torneosRecientes'
+        ));
+    }
+
+    /**
+     * Generar reporte de usuarios
+     */
+    public function reporteUsuarios(Request $request)
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $query = User::query();
+
+        // Filtros opcionales
+        if ($request->filled('rol')) {
+            $query->where('rol', $request->rol);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
+
+        $usuarios = $query->orderBy('created_at', 'desc')->get();
+
+        // Estadísticas
+        $totalUsuarios = $usuarios->count();
+        $totalPuntos = $usuarios->sum('puntos_total');
+        $promedioPuntos = $usuarios->avg('puntos_total');
+        $totalTorneosGanados = $usuarios->sum('torneos_ganados');
+
+        $roles = User::select('rol')->distinct()->pluck('rol');
+
+        return view('admin.reporte-usuarios', compact(
+            'usuarios',
+            'totalUsuarios',
+            'totalPuntos',
+            'promedioPuntos',
+            'totalTorneosGanados',
+            'roles'
+        ));
+    }
+
+    /**
+     * Generar reporte de torneos
+     */
+    public function reporteTorneos(Request $request)
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $query = Torneo::with(['organizador', 'participaciones']);
+
+        // Filtros opcionales
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('categoria')) {
+            $query->where('categoria', $request->categoria);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha_inicio', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha_fin', '<=', $request->fecha_hasta);
+        }
+
+        $torneos = $query->orderBy('fecha_inicio', 'desc')->get();
+
+        // Estadísticas
+        $totalTorneos = $torneos->count();
+        $totalParticipantes = $torneos->sum('participantes_actuales');
+        $promedioParticipantes = $torneos->avg('participantes_actuales');
+
+        $estados = ['Próximo', 'Inscripciones Abiertas', 'En Curso', 'Evaluación', 'Finalizado'];
+        $categorias = Torneo::select('categoria')->distinct()->pluck('categoria');
+
+        return view('admin.reporte-torneos', compact(
+            'torneos',
+            'totalTorneos',
+            'totalParticipantes',
+            'promedioParticipantes',
+            'estados',
+            'categorias'
+        ));
+    }
+
+    /**
+     * Generar reporte de evaluaciones
+     */
+    public function reporteEvaluaciones(Request $request)
+    {
+        if (auth()->user()->rol !== 'Administrador') {
+            abort(403);
+        }
+
+        $query = Evaluacion::with(['juez', 'torneoParticipacion.torneo', 'torneoParticipacion.equipo']);
+
+        // Filtros opcionales
+        if ($request->filled('torneo_id')) {
+            $query->whereHas('torneoParticipacion', function($q) use ($request) {
+                $q->where('torneo_id', $request->torneo_id);
+            });
+        }
+
+        if ($request->filled('juez_id')) {
+            $query->where('juez_id', $request->juez_id);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
+
+        $evaluaciones = $query->orderBy('created_at', 'desc')->get();
+
+        // Estadísticas
+        $totalEvaluaciones = $evaluaciones->count();
+        $promedioPuntaje = $evaluaciones->avg('puntaje_total');
+        $puntajeMaximo = $evaluaciones->max('puntaje_total');
+        $puntajeMinimo = $evaluaciones->min('puntaje_total');
+
+        // Evaluaciones por juez
+        $evaluacionesPorJuez = Evaluacion::select('juez_id', DB::raw('count(*) as total'))
+            ->groupBy('juez_id')
+            ->with('juez')
+            ->get();
+
+        $torneos = Torneo::orderBy('fecha_inicio', 'desc')->get(['id', 'name']);
+        $jueces = User::where('rol', 'Juez')->get(['id', 'name']);
+
+        return view('admin.reporte-evaluaciones', compact(
+            'evaluaciones',
+            'totalEvaluaciones',
+            'promedioPuntaje',
+            'puntajeMaximo',
+            'puntajeMinimo',
+            'evaluacionesPorJuez',
+            'torneos',
+            'jueces'
+        ));
     }
 }
