@@ -110,20 +110,27 @@ Route::middleware('auth')->group(function () {
 //rutas para administrador
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
-    
+
     // Crear Juez
     Route::get('/crear-juez', [AdminController::class, 'crearJuez'])->name('crear-juez');
     Route::post('/crear-juez', [AdminController::class, 'storeJuez'])->name('store-juez');
-    
+
     // Crear Usuario
     Route::get('/crear-usuario', [AdminController::class, 'crearUsuario'])->name('crear-usuario');
     Route::post('/crear-usuario', [AdminController::class, 'storeUsuario'])->name('store-usuario');
-    
+
     // Eliminar Usuario
     Route::delete('/eliminar-usuario/{id}', [AdminController::class, 'eliminarUsuario'])->name('eliminar-usuario');
-    
+
     // Asignar Jueces a Torneos
     Route::get('/asignar-jueces', [AdminController::class, 'asignarJueces'])->name('asignar-jueces');
     Route::post('/asignar-jueces', [AdminController::class, 'storeAsignacionJueces'])->name('store-asignacion-jueces');
     Route::delete('/remover-juez-torneo', [AdminController::class, 'removerJuezTorneo'])->name('remover-juez-torneo');
+
+    // Reportes
+    Route::get('/reportes', [AdminController::class, 'reportes'])->name('reportes');
+    Route::get('/reportes/general', [AdminController::class, 'reporteGeneral'])->name('reportes.general');
+    Route::get('/reportes/usuarios', [AdminController::class, 'reporteUsuarios'])->name('reportes.usuarios');
+    Route::get('/reportes/torneos', [AdminController::class, 'reporteTorneos'])->name('reportes.torneos');
+    Route::get('/reportes/evaluaciones', [AdminController::class, 'reporteEvaluaciones'])->name('reportes.evaluaciones');
 });
