@@ -39,7 +39,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'admi@gmail.com',
             'rol' => 'Administrador',
         ]);
-        $this->call(TorneoSeeder::class);
         
     }
 }
