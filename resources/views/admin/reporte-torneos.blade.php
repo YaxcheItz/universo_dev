@@ -44,11 +44,11 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Fecha Inicio Desde</label>
-                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none">
+                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Fecha Fin Hasta</label>
-                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none">
+                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
             </div>
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-universo-purple hover:bg-universo-purple/80 text-white rounded-lg transition">
