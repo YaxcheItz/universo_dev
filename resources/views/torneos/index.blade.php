@@ -11,10 +11,12 @@
             <h1 class="text-3xl font-bold text-universo-text mb-2">Torneos</h1>
             <p class="text-universo-text-muted">Participa en competencias de programación</p>
         </div>
-        <a href="{{ route('torneos.create') }}" class="btn-primary flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-5 h-5"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
-            Crear Torneo
-        </a>
+        @if(auth()->check() && auth()->user()->rol === 'Administrador')
+            <a href="{{ route('torneos.create') }}" class="btn-primary flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-5 h-5"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                Crear Torneo
+            </a>
+        @endif
     </div>
 
     <!-- Search and Filters -->
