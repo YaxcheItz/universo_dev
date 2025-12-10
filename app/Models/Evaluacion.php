@@ -33,6 +33,14 @@ class Evaluacion extends Model
     }
 
     /**
+     * Alias para participacion (para compatibilidad)
+     */
+    public function torneoParticipacion()
+    {
+        return $this->belongsTo(TorneoParticipacion::class, 'torneo_participacion_id');
+    }
+
+    /**
      * El juez que realizó la evaluación
      */
     public function juez()
