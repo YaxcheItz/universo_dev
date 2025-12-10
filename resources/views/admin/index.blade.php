@@ -92,6 +92,43 @@
 
         <!-- Contenido Tab Usuarios -->
         <div id="content-usuarios" class="p-6">
+            <!-- Barra de búsqueda -->
+            <div class="mb-8">
+                <form action="{{ route('admin.index') }}" method="GET" class="flex gap-4">
+                    <input type="hidden" name="tab" value="usuarios">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-5 h-5 text-universo-text-muted">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            name="busqueda_usuarios"
+                            placeholder="Buscar por nombre o email..."
+                            class="w-full pl-10 px-4 py-2.5 bg-black/50 border-2 border-universo-purple rounded-lg text-white placeholder-universo-text-muted focus:outline-none focus:ring-2 focus:ring-universo-purple focus:border-universo-purple"
+                            value="{{ request('busqueda_usuarios') ?? '' }}"
+                        >
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 bg-universo-purple hover:bg-universo-purple/80 text-white rounded-lg transition font-medium">
+                        Buscar
+                    </button>
+                    @if(request('busqueda_usuarios'))
+                        <a href="{{ route('admin.index') }}?tab=usuarios" class="px-6 py-2.5 bg-universo-secondary border border-universo-border hover:bg-universo-primary text-white rounded-lg transition font-medium">
+                            Limpiar
+                        </a>
+                    @endif
+                </form>
+
+                @if(request('busqueda_usuarios'))
+                    <p class="text-universo-text-muted mt-2">
+                        Resultados para: <span class="text-universo-text font-semibold">"{{ request('busqueda_usuarios') }}"</span>
+                        ({{ $usuarios->total() }} {{ $usuarios->total() === 1 ? 'resultado' : 'resultados' }})
+                    </p>
+                @endif
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -158,6 +195,43 @@
 
         <!-- Contenido Tab Jueces -->
         <div id="content-jueces" class="p-6 hidden">
+            <!-- Barra de búsqueda -->
+            <div class="mb-8">
+                <form action="{{ route('admin.index') }}" method="GET" class="flex gap-4">
+                    <input type="hidden" name="tab" value="jueces">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-5 h-5 text-universo-text-muted">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            name="busqueda"
+                            placeholder="Buscar por nombre o email..."
+                            class="w-full pl-10 px-4 py-2.5 bg-black/50 border-2 border-universo-purple rounded-lg text-white placeholder-universo-text-muted focus:outline-none focus:ring-2 focus:ring-universo-purple focus:border-universo-purple"
+                            value="{{ $busqueda ?? '' }}"
+                        >
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 bg-universo-purple hover:bg-universo-purple/80 text-white rounded-lg transition font-medium">
+                        Buscar
+                    </button>
+                    @if($busqueda)
+                        <a href="{{ route('admin.index') }}?tab=jueces" class="px-6 py-2.5 bg-universo-secondary border border-universo-border hover:bg-universo-primary text-white rounded-lg transition font-medium">
+                            Limpiar
+                        </a>
+                    @endif
+                </form>
+
+                @if($busqueda)
+                    <p class="text-universo-text-muted mt-2">
+                        Resultados para: <span class="text-universo-text font-semibold">"{{ $busqueda }}"</span>
+                        ({{ $jueces->count() }} {{ $jueces->count() === 1 ? 'resultado' : 'resultados' }})
+                    </p>
+                @endif
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -219,18 +293,31 @@ function cambiarTab(tab) {
     // Ocultar todos los contenidos
     document.getElementById('content-usuarios').classList.add('hidden');
     document.getElementById('content-jueces').classList.add('hidden');
-    
+
     // Resetear estilos de tabs
     document.getElementById('tab-usuarios').classList.remove('text-white', 'border-universo-purple');
     document.getElementById('tab-usuarios').classList.add('text-universo-text-muted', 'border-transparent');
     document.getElementById('tab-jueces').classList.remove('text-white', 'border-universo-purple');
     document.getElementById('tab-jueces').classList.add('text-universo-text-muted', 'border-transparent');
-    
+
     // Mostrar contenido seleccionado
     document.getElementById('content-' + tab).classList.remove('hidden');
     document.getElementById('tab-' + tab).classList.remove('text-universo-text-muted', 'border-transparent');
     document.getElementById('tab-' + tab).classList.add('text-white', 'border-universo-purple');
 }
+
+// Si hay una búsqueda activa o parámetro tab, mostrar la pestaña correspondiente
+document.addEventListener('DOMContentLoaded', function() {
+    const busqueda = '{{ $busqueda ?? '' }}';
+    const tab = '{{ request("tab") ?? "" }}';
+    const busquedaUsuarios = '{{ request("busqueda_usuarios") ?? "" }}';
+
+    if (busqueda || tab === 'jueces') {
+        cambiarTab('jueces');
+    } else if (busquedaUsuarios || tab === 'usuarios') {
+        cambiarTab('usuarios');
+    }
+});
 </script>
 @endpush
 @endsection
