@@ -116,23 +116,45 @@
                             </p>
                         </div>
 
-                        <button 
-                            onclick="toggleAsignacion({{ $torneo->id }})"
-                            class="px-4 py-2 bg-universo-cyan hover:bg-universo-cyan/80 text-white rounded-lg transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <line x1="19" x2="19" y1="8" y2="14"></line>
-                                <line x1="22" x2="16" y1="11" y2="11"></line>
-                            </svg>
-                            Asignar Jueces
-                        </button>
+                        @if(in_array($torneo->estado, ['Evaluación', 'Finalizado']))
+                            <div class="px-4 py-2 bg-gray-500/20 text-gray-400 rounded-lg flex items-center gap-2 cursor-not-allowed" title="No se pueden asignar jueces en este estado">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                </svg>
+                                Asignación Bloqueada
+                            </div>
+                        @else
+                            <button
+                                onclick="toggleAsignacion({{ $torneo->id }})"
+                                class="px-4 py-2 bg-universo-cyan hover:bg-universo-cyan/80 text-white rounded-lg transition flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <line x1="19" x2="19" y1="8" y2="14"></line>
+                                    <line x1="22" x2="16" y1="11" y2="11"></line>
+                                </svg>
+                                Asignar Jueces
+                            </button>
+                        @endif
                     </div>
 
                     <!-- Jueces Asignados -->
                     @if($torneo->jueces->isNotEmpty())
                         <div class="mt-4 pt-4 border-t border-universo-border">
                             <p class="text-sm text-universo-text-muted mb-3">Jueces asignados ({{ $torneo->jueces->count() }}):</p>
+
+                            @if(in_array($torneo->estado, ['Evaluación', 'Finalizado']))
+                                <div class="bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-4 py-3 rounded-lg mb-3 text-sm flex items-start gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0 mt-0.5">
+                                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                        <path d="M12 9v4"></path>
+                                        <path d="M12 17h.01"></path>
+                                    </svg>
+                                    <span><strong>Torneo en estado "{{ $torneo->estado }}"</strong> - No se pueden modificar los jueces asignados.</span>
+                                </div>
+                            @endif
+
                             <div class="flex flex-wrap gap-2">
                                 @foreach($torneo->jueces as $juez)
                                     <div class="flex items-center gap-2 px-3 py-2 bg-universo-primary border border-universo-border rounded-lg">
@@ -144,18 +166,20 @@
                                             </div>
                                         @endif
                                         <span class="text-sm text-white">{{ $juez->name }}</span>
-                                        <form method="POST" action="{{ route('admin.remover-juez-torneo') }}" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <input type="hidden" name="torneo_id" value="{{ $torneo->id }}">
-                                            <input type="hidden" name="juez_id" value="{{ $juez->id }}">
-                                            <button type="submit" onclick="return confirm('¿Remover este juez del torneo?')" class="text-red-400 hover:text-red-300 transition">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <line x1="18" x2="6" y1="6" y2="18"></line>
-                                                    <line x1="6" x2="18" y1="6" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        @if(!in_array($torneo->estado, ['Evaluación', 'Finalizado']))
+                                            <form method="POST" action="{{ route('admin.remover-juez-torneo') }}" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="torneo_id" value="{{ $torneo->id }}">
+                                                <input type="hidden" name="juez_id" value="{{ $juez->id }}">
+                                                <button type="submit" onclick="return confirm('¿Remover este juez del torneo?')" class="text-red-400 hover:text-red-300 transition">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="18" x2="6" y1="6" y2="18"></line>
+                                                        <line x1="6" x2="18" y1="6" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
