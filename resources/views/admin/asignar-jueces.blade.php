@@ -219,7 +219,7 @@
                                         type="text"
                                         id="buscarJuez-{{ $torneo->id }}"
                                         placeholder="Buscar juez por nombre o email..."
-                                        class="w-full pl-10 pr-4 py-2 bg-universo-primary border border-universo-border rounded-lg text-white placeholder-universo-text-muted focus:border-universo-cyan focus:outline-none [color-scheme:dark]"
+                                        class="input-field pl-10 pr-4"
                                         onkeyup="filtrarJueces({{ $torneo->id }})">
                                 </div>
                             </div>
