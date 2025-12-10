@@ -26,7 +26,7 @@
         <form method="GET" action="{{ route('admin.reportes.evaluaciones') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Torneo</label>
-                <select name="torneo_id" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <select name="torneo_id" class="input-field">
                     <option value="">Todos</option>
                     @foreach($torneos as $torneo)
                     <option value="{{ $torneo->id }}" {{ request('torneo_id') == $torneo->id ? 'selected' : '' }}>{{ $torneo->name }}</option>
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Juez</label>
-                <select name="juez_id" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <select name="juez_id" class="input-field">
                     <option value="">Todos</option>
                     @foreach($jueces as $juez)
                     <option value="{{ $juez->id }}" {{ request('juez_id') == $juez->id ? 'selected' : '' }}>{{ $juez->name }}</option>
@@ -44,17 +44,17 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Fecha Desde</label>
-                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="input-field">
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Fecha Hasta</label>
-                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="input-field">
             </div>
             <div class="flex items-end gap-2">
-                <button type="submit" class="flex-1 px-4 py-2 bg-universo-purple hover:bg-universo-purple/80 text-white rounded-lg transition">
+                <button type="submit" class="flex-1 btn-primary">
                     Filtrar
                 </button>
-                <a href="{{ route('admin.reportes.evaluaciones') }}" class="px-4 py-2 bg-universo-secondary hover:bg-universo-border text-white rounded-lg transition border border-universo-border">
+                <a href="{{ route('admin.reportes.evaluaciones') }}" class="px-4 py-2.5 bg-universo-secondary border border-universo-border hover:bg-universo-primary text-white rounded-lg transition font-medium">
                     Limpiar
                 </a>
             </div>
