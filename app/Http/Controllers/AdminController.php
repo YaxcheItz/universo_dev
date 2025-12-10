@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Torneo;
 use App\Models\Evaluacion;
 use App\Models\TorneoParticipacion;
+use App\Notifications\UserAccountNotification;
+use App\Notifications\JudgeTournamentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -27,7 +29,6 @@ class AdminController extends Controller
 
     public function index()
     {
-        // Verificar que el usuario sea administrador
         if (auth()->user()->rol !== 'Administrador') {
             abort(403, 'No tienes permiso para acceder a esta sección');
         }
@@ -64,15 +65,18 @@ class AdminController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        User::create([
+        $juez = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => 'Juez',
         ]);
 
+        // Enviar notificación por correo
+        $juez->notify(new UserAccountNotification($juez, auth()->user(), 'juez_creado'));
+
         return redirect()->route('admin.index')
-            ->with('success', 'Juez creado exitosamente');
+            ->with('success', 'Juez creado exitosamente. Se ha enviado un correo de bienvenida.');
     }
 
     public function crearUsuario()
@@ -100,20 +104,22 @@ class AdminController extends Controller
             'rol_personalizado' => 'nullable|string|max:255',
         ]);
 
-        // Si seleccionó "Otro", usar el rol personalizado
         $rol = $request->rol === 'Otro' && $request->rol_personalizado 
             ? $request->rol_personalizado 
             : $request->rol;
 
-        User::create([
+        $usuario = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => $rol,
         ]);
 
+        // Enviar notificación por correo
+        $usuario->notify(new UserAccountNotification($usuario, auth()->user(), 'usuario_creado'));
+
         return redirect()->route('admin.index')
-            ->with('success', 'Usuario creado exitosamente');
+            ->with('success', 'Usuario creado exitosamente. Se ha enviado un correo de bienvenida.');
     }
 
     public function eliminarUsuario($id)
@@ -124,21 +130,20 @@ class AdminController extends Controller
 
         $usuario = User::findOrFail($id);
 
-        // No permitir eliminar administradores
         if ($usuario->rol === 'Administrador') {
             return redirect()->route('admin.index')
                 ->with('error', 'No se puede eliminar un administrador');
         }
 
-        $usuario->delete();
+        // Enviar notificación antes de eliminar
+        $usuario->notify(new UserAccountNotification($usuario, auth()->user(), 'usuario_eliminado'));
+
+        $usuario->forceDelete();//eliminacion forzada sobre soft de modelo
 
         return redirect()->route('admin.index')
-            ->with('success', 'Usuario eliminado exitosamente');
+            ->with('success', 'Usuario eliminado exitosamente. Se ha enviado un correo de notificación.');
     }
 
-    /**
-     * Mostrar formulario para asignar jueces a torneos
-     */
     public function asignarJueces()
     {
         if (auth()->user()->rol !== 'Administrador') {
@@ -154,9 +159,6 @@ class AdminController extends Controller
         return view('admin.asignar-jueces', compact('torneos', 'jueces'));
     }
 
-    /**
-     * Asignar jueces a un torneo específico
-     */
     public function storeAsignacionJueces(Request $request)
     {
         if (auth()->user()->rol !== 'Administrador') {
@@ -165,19 +167,26 @@ class AdminController extends Controller
 
         $request->validate([
             'torneo_id' => 'required|exists:torneos,id',
-            'jueces' => 'nullable|array', // Cambiado a nullable para permitir eliminar todos
+            'jueces' => 'nullable|array',
             'jueces.*' => 'exists:users,id',
         ]);
 
         $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
+        $juecesAnteriores = $torneo->jueces->pluck('id')->toArray();
 
-        // Si no se envió el array de jueces o está vacío, desvincular todos
         if (!$request->has('jueces') || empty($request->jueces)) {
-            $torneo->jueces()->detach(); // Elimina todos los jueces
-            return back()->with('success', 'Todos los jueces han sido removidos del torneo');
+            // Notificar a los jueces que fueron removidos
+            foreach ($juecesAnteriores as $juezId) {
+                $juez = User::find($juezId);
+                if ($juez) {
+                    $juez->notify(new JudgeTournamentNotification($juez, $torneo, auth()->user(), 'removido'));
+                }
+            }
+            
+            $torneo->jueces()->detach();
+            return back()->with('success', 'Todos los jueces han sido removidos y notificados por correo.');
         }
 
-        // Verificar que todos los IDs correspondan a jueces válidos
         $juecesValidos = User::whereIn('id', $request->jueces)
             ->where('rol', 'Juez')
             ->pluck('id')
@@ -187,15 +196,32 @@ class AdminController extends Controller
             return back()->with('error', 'Algunos de los usuarios seleccionados no son jueces válidos');
         }
 
-        // Sincronizar jueces (elimina los no seleccionados y agrega los nuevos)
+        // Determinar jueces nuevos y removidos
+        $juecesNuevos = array_diff($juecesValidos, $juecesAnteriores);
+        $juecesRemovidos = array_diff($juecesAnteriores, $juecesValidos);
+
+        // Sincronizar jueces
         $torneo->jueces()->sync($juecesValidos);
 
-        return back()->with('success', 'Jueces asignados exitosamente al torneo');
+        // Notificar a los jueces nuevos
+        foreach ($juecesNuevos as $juezId) {
+            $juez = User::find($juezId);
+            if ($juez) {
+                $juez->notify(new JudgeTournamentNotification($juez, $torneo, auth()->user(), 'asignado'));
+            }
+        }
+
+        // Notificar a los jueces removidos
+        foreach ($juecesRemovidos as $juezId) {
+            $juez = User::find($juezId);
+            if ($juez) {
+                $juez->notify(new JudgeTournamentNotification($juez, $torneo, auth()->user(), 'removido'));
+            }
+        }
+
+        return back()->with('success', 'Jueces asignados exitosamente. Se han enviado correos de notificación.');
     }
 
-    /**
-     * Eliminar un juez específico de un torneo
-     */
     public function removerJuezTorneo(Request $request)
     {
         if (auth()->user()->rol !== 'Administrador') {
@@ -208,9 +234,14 @@ class AdminController extends Controller
         ]);
 
         $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
+        $juez = User::findOrFail($request->juez_id);
+        
         $torneo->jueces()->detach($request->juez_id);
 
-        return back()->with('success', 'Juez removido del torneo exitosamente');
+        // Notificar al juez removido
+        $juez->notify(new JudgeTournamentNotification($juez, $torneo, auth()->user(), 'removido'));
+
+        return back()->with('success', 'Juez removido del torneo. Se ha enviado un correo de notificación.');
     }
 
     /**
