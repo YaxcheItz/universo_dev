@@ -26,7 +26,7 @@
         <form method="GET" action="{{ route('admin.reportes.torneos') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Estado</label>
-                <select name="estado" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none">
+                <select name="estado" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
                     <option value="">Todos</option>
                     @foreach($estados as $estado)
                     <option value="{{ $estado }}" {{ request('estado') == $estado ? 'selected' : '' }}>{{ $estado }}</option>
@@ -35,7 +35,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Categoría</label>
-                <select name="categoria" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none">
+                <select name="categoria" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
                     <option value="">Todas</option>
                     @foreach($categorias as $categoria)
                     <option value="{{ $categoria }}" {{ request('categoria') == $categoria ? 'selected' : '' }}>{{ $categoria }}</option>
