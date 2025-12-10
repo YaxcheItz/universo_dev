@@ -174,7 +174,7 @@
                         <input type="hidden" name="torneo_id" value="{{ $torneo->id }}">
                         
                         <label class="block text-sm font-medium text-universo-text mb-3">
-                            Selecciona los jueces para este torneo:
+                            Busca y selecciona los jueces para este torneo:
                         </label>
 
                         @if($jueces->isEmpty())
@@ -183,16 +183,33 @@
                             <div class="bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-4 py-3 rounded-lg mb-4 text-sm">
                                 <strong>Nota:</strong> Los cambios reemplazarán completamente la asignación actual. Desmarca todos para eliminar todos los jueces.
                             </div>
-                            <div class="space-y-2 mb-4 max-h-60 overflow-y-auto">
+
+                            <!-- Buscador -->
+                            <div class="mb-4">
+                                <div class="relative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-universo-text-muted">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        id="buscarJuez-{{ $torneo->id }}"
+                                        placeholder="Buscar juez por nombre o email..."
+                                        class="w-full pl-10 pr-4 py-2 bg-universo-primary border border-universo-border rounded-lg text-white placeholder-universo-text-muted focus:border-universo-cyan focus:outline-none [color-scheme:dark]"
+                                        onkeyup="filtrarJueces({{ $torneo->id }})">
+                                </div>
+                            </div>
+
+                            <div id="listaJueces-{{ $torneo->id }}" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
                                 @foreach($jueces as $juez)
-                                    <label class="flex items-center gap-3 p-3 bg-universo-secondary border border-universo-border rounded-lg hover:bg-universo-secondary/80 cursor-pointer transition">
-                                        <input 
-                                            type="checkbox" 
-                                            name="jueces[]" 
+                                    <label class="juez-item flex items-center gap-3 p-3 bg-universo-secondary border border-universo-border rounded-lg hover:bg-universo-secondary/80 cursor-pointer transition" data-nombre="{{ strtolower($juez->name) }}" data-email="{{ strtolower($juez->email) }}">
+                                        <input
+                                            type="checkbox"
+                                            name="jueces[]"
                                             value="{{ $juez->id }}"
                                             {{ $torneo->jueces->contains($juez->id) ? 'checked' : '' }}
                                             class="w-4 h-4 text-universo-cyan bg-universo-primary border-universo-border rounded focus:ring-2 focus:ring-universo-cyan">
-                                        
+
                                         <div class="flex items-center gap-2 flex-1">
                                             @if($juez->avatar)
                                                 <img src="{{ asset('storage/' . $juez->avatar) }}" alt="{{ $juez->name }}" class="w-8 h-8 rounded-full object-cover">
@@ -211,12 +228,12 @@
                             </div>
 
                             <div class="flex gap-3">
-                                <button 
+                                <button
                                     type="submit"
                                     class="px-6 py-2 bg-universo-cyan hover:bg-universo-cyan/80 text-white rounded-lg transition">
                                     Guardar Asignación
                                 </button>
-                                <button 
+                                <button
                                     type="button"
                                     onclick="toggleAsignacion({{ $torneo->id }})"
                                     class="px-6 py-2 border border-universo-border text-universo-text hover:bg-universo-secondary rounded-lg transition">
@@ -248,6 +265,24 @@
 function toggleAsignacion(torneoId) {
     const elemento = document.getElementById('asignacion-' + torneoId);
     elemento.classList.toggle('hidden');
+}
+
+function filtrarJueces(torneoId) {
+    const buscador = document.getElementById('buscarJuez-' + torneoId);
+    const lista = document.getElementById('listaJueces-' + torneoId);
+    const textoBusqueda = buscador.value.toLowerCase();
+    const items = lista.querySelectorAll('.juez-item');
+
+    items.forEach(item => {
+        const nombre = item.getAttribute('data-nombre');
+        const email = item.getAttribute('data-email');
+
+        if (nombre.includes(textoBusqueda) || email.includes(textoBusqueda)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
 }
 </script>
 @endpush
