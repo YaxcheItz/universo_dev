@@ -22,21 +22,40 @@ class AdminController extends Controller
         'Data Scientist'
     ];
 
-    public function index()
+    public function index(Request $request)
     {
         if (auth()->user()->rol !== 'Administrador') {
             abort(403, 'No tienes permiso para acceder a esta sección');
         }
 
+        // Búsqueda de usuarios
+        $busquedaUsuarios = $request->get('busqueda_usuarios');
         $usuarios = User::where('rol', '!=', 'Administrador')
+            ->when($busquedaUsuarios, function ($query, $busquedaUsuarios) {
+                return $query->where(function ($q) use ($busquedaUsuarios) {
+                    $q->where('name', 'like', '%' . $busquedaUsuarios . '%')
+                      ->orWhere('email', 'like', '%' . $busquedaUsuarios . '%');
+                });
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $jueces = User::where('rol', 'Juez')->get();
+        // Búsqueda de jueces
+        $busqueda = $request->get('busqueda');
+        $jueces = User::where('rol', 'Juez')
+            ->when($busqueda, function ($query, $busqueda) {
+                return $query->where(function ($q) use ($busqueda) {
+                    $q->where('name', 'like', '%' . $busqueda . '%')
+                      ->orWhere('email', 'like', '%' . $busqueda . '%');
+                });
+            })
+            ->orderBy('name', 'asc')
+            ->get();
+
         $totalUsuarios = User::where('rol', '!=', 'Administrador')->count();
         $totalJueces = User::where('rol', 'Juez')->count();
 
-        return view('admin.index', compact('usuarios', 'jueces', 'totalUsuarios', 'totalJueces'));
+        return view('admin.index', compact('usuarios', 'jueces', 'totalUsuarios', 'totalJueces', 'busqueda'));
     }
 
     public function crearJuez()
