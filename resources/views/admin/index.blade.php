@@ -115,7 +115,7 @@
                             type="text"
                             name="busqueda_usuarios"
                             placeholder="Buscar por nombre o email..."
-                            class="w-full pl-10 px-4 py-2.5 bg-black/50 border-2 border-universo-purple rounded-lg text-white placeholder-universo-text-muted focus:outline-none focus:ring-2 focus:ring-universo-purple focus:border-universo-purple [color-scheme:dark]"
+                            class="input-field pl-10"
                             value="{{ request('busqueda_usuarios') ?? '' }}"
                         >
                     </div>
@@ -218,7 +218,7 @@
                             type="text"
                             name="busqueda"
                             placeholder="Buscar por nombre o email..."
-                            class="w-full pl-10 px-4 py-2.5 bg-black/50 border-2 border-universo-purple rounded-lg text-white placeholder-universo-text-muted focus:outline-none focus:ring-2 focus:ring-universo-purple focus:border-universo-purple [color-scheme:dark]"
+                            class="input-field pl-10"
                             value="{{ $busqueda ?? '' }}"
                         >
                     </div>
