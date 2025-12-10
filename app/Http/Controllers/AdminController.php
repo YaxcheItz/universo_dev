@@ -191,6 +191,12 @@ class AdminController extends Controller
         ]);
 
         $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
+
+        // Validar que el torneo no esté en Evaluación o Finalizado
+        if (in_array($torneo->estado, ['Evaluación', 'Finalizado'])) {
+            return back()->with('error', 'No se pueden asignar jueces a un torneo en estado "' . $torneo->estado . '".');
+        }
+
         $juecesAnteriores = $torneo->jueces->pluck('id')->toArray();
 
         if (!$request->has('jueces') || empty($request->jueces)) {
@@ -254,7 +260,12 @@ class AdminController extends Controller
 
         $torneo = \App\Models\Torneo::findOrFail($request->torneo_id);
         $juez = User::findOrFail($request->juez_id);
-        
+
+        // Validar que el torneo no esté en Evaluación o Finalizado
+        if (in_array($torneo->estado, ['Evaluación', 'Finalizado'])) {
+            return back()->with('error', 'No se pueden remover jueces de un torneo en estado "' . $torneo->estado . '".');
+        }
+
         $torneo->jueces()->detach($request->juez_id);
 
         // Notificar al juez removido
