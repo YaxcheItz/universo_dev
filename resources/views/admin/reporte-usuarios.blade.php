@@ -26,7 +26,7 @@
         <form method="GET" action="{{ route('admin.reportes.usuarios') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Rol</label>
-                <select name="rol" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <select name="rol" class="input-field">
                     <option value="">Todos</option>
                     @foreach($roles as $rol)
                     <option value="{{ $rol }}" {{ request('rol') == $rol ? 'selected' : '' }}>{{ $rol }}</option>
@@ -35,17 +35,17 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Desde</label>
-                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}" class="input-field">
             </div>
             <div>
                 <label class="block text-sm font-medium text-universo-text-muted mb-2">Hasta</label>
-                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="w-full px-3 py-2 bg-universo-primary border border-universo-border rounded-lg text-white focus:border-universo-purple focus:outline-none [color-scheme:dark]">
+                <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}" class="input-field">
             </div>
             <div class="flex items-end gap-2">
-                <button type="submit" class="flex-1 px-4 py-2 bg-universo-purple hover:bg-universo-purple/80 text-white rounded-lg transition">
+                <button type="submit" class="flex-1 btn-primary">
                     Filtrar
                 </button>
-                <a href="{{ route('admin.reportes.usuarios') }}" class="px-4 py-2 bg-universo-secondary hover:bg-universo-border text-white rounded-lg transition border border-universo-border">
+                <a href="{{ route('admin.reportes.usuarios') }}" class="px-4 py-2.5 bg-universo-secondary border border-universo-border hover:bg-universo-primary text-white rounded-lg transition font-medium">
                     Limpiar
                 </a>
             </div>
