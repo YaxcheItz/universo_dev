@@ -357,8 +357,8 @@
         </div>
     </div>
 
-    <!-- Formulario para Subir Archivos (solo para miembros del equipo) -->
-    @if($isMember && !$canAccept)
+    <!-- Formulario para Subir Archivos (solo para miembros del equipo y lider) -->
+    @if($isMember || $isCreador || $canAccept)
         <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-universo-card-bg via-universo-card-bg to-blue-500/5 border-2 border-universo-border/50 backdrop-blur-sm mt-6">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-50"></div>
 
@@ -373,13 +373,16 @@
                         Subir Archivo
                     </h2>
                 </div>
-
                 <div class="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
-                <p class="text-sm text-yellow-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    Los archivos que subas deberán ser aprobados por el líder del equipo antes de ser visibles.
-                </p>
-            </div>
+                    <p class="text-sm text-yellow-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        @if(!$canAccept)
+                        Los archivos que subas deberán ser aprobados por el líder del equipo antes de ser visibles.
+                        @else
+                        Como líder/creador, tus archivos serán aceptados automáticamente.
+                        @endif
+                    </p>
+</div>
 
             <form action="{{ route('proyectos.files.upload', $proyecto) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
