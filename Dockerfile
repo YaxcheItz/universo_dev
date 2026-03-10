@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,9 +29,6 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Copy existing application directory permissions
-RUN chown -R www-data:www-data /var/www
-
 # Install dependencies
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
@@ -42,15 +39,13 @@ RUN npm ci && npm run build
 RUN touch /var/www/database/database.sqlite
 
 # Set permissions
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/database
+RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 
-# Cache Laravel configuration
-RUN php artisan config:cache && \
+# Expose port (Render uses PORT env variable)
+EXPOSE ${PORT:-8080}
+
+# Start script
+CMD php artisan migrate --force && \
+    php artisan config:cache && \
     php artisan route:cache && \
-    php artisan view:cache
-
-# Expose port 8080
-EXPOSE 8080
-
-# Start Laravel server
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080
+    php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
