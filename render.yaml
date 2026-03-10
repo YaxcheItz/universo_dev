@@ -1,3 +1,9 @@
+databases:
+  - name: universo-dev-db
+    databaseName: universo_dev
+    user: universo_dev_user
+    plan: free
+
 services:
   - type: web
     name: universo-dev
@@ -23,6 +29,24 @@ services:
       - key: QUEUE_CONNECTION
         value: sync
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: universo-dev-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: universo-dev-db
+          property: port
       - key: DB_DATABASE
-        value: /var/www/database/database.sqlite
+        fromDatabase:
+          name: universo-dev-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: universo-dev-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: universo-dev-db
+          property: password
