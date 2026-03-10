@@ -9,7 +9,11 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        generateValue: true
+        value: base64:uNGbpjhpbWDPC1aqom6Rs0+jODbAos8y8JzmQeGTiEs=
+      - key: APP_URL
+        sync: false
+      - key: ASSET_URL
+        sync: false
       - key: LOG_CHANNEL
         value: stderr
       - key: SESSION_DRIVER

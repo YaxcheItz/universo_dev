@@ -45,7 +45,8 @@ RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 EXPOSE ${PORT:-8080}
 
 # Start script
-CMD php artisan migrate --force && \
+CMD php artisan config:clear && \
+    php artisan migrate --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
