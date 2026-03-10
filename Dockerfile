@@ -43,6 +43,7 @@ EXPOSE ${PORT:-8080}
 # Start script
 CMD php artisan config:clear && \
     php artisan migrate --force && \
+    php artisan db:seed --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
