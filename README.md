@@ -1,59 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# UniversoDev 🚀
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A comprehensive platform for organizing, managing, and participating in programming tournaments and hackathons. 
 
-## About Laravel
+[![Live Demo](https://img.shields.io/badge/Live_Demo-universo--dev.onrender.com-success?style=for-the-badge&logo=render)](https://universo-dev.onrender.com/login)
+[![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net/)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+UniversoDev is a full-stack web application designed to bridge the gap between developers and competitive programming events. It provides a robust ecosystem for administrators to host tournaments, judges to evaluate submissions, and participants to showcase their skills, form teams, and earn recognition.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*   **Role-Based Access Control (RBAC):** Secure authentication and authorization with dedicated dashboards for Administrators, Judges, and Standard Users.
+*   **Tournament Management:** End-to-end lifecycle management of programming tournaments (Open, In Progress, Upcoming, In Evaluation, Finished) with category filtering.
+*   **Team & Project Collaboration:** Users can create teams, manage member requests, and submit projects (with file attachments) to specific tournaments.
+*   **Evaluation System:** Dedicated interfaces for assigned judges to review projects, assign scores based on specific criteria, and provide feedback.
+*   **Gamification & Profiles:** User profiles track completed projects, tournaments won, and accumulate total points. Includes skill tagging and social links (LinkedIn, Portfolio).
+*   **Automated Certificate Generation:** Dynamically generates downloadable PDF certificates for participants and winners using `dompdf`.
+*   **Real-time Notifications:** Event-driven architecture to notify users about tournament status changes, team invitations, and evaluation results.
+*   **Comprehensive Reporting:** Admin tools for generating reports on users, tournaments, and evaluations.
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Backend:**
+*   [Laravel](https://laravel.com/) (PHP) - Core Framework
+*   Eloquent ORM - Database Interactions
+*   Laravel Sanctum - Authentication
+*   Barryvdh/Laravel-DomPDF - PDF Generation
+*   PostgreSQL / SQLite - Relational Database
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Frontend:**
+*   [Tailwind CSS](https://tailwindcss.com/) - Utility-first styling for a modern, responsive UI
+*   Blade Templating Engine - Server-side rendering
+*   Vite - Frontend build tool and asset bundler
 
-## Laravel Sponsors
+**Infrastructure & Deployment:**
+*   Docker - Containerization
+*   [Render](https://render.com/) - Cloud Application Hosting
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Live Demo
 
-### Premium Partners
+You can access the live application here: **[UniversoDev Live on Render](https://universo-dev.onrender.com/login)**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+*(Note: The first load might take a few seconds as the instance wakes up from a dormant state on Render's free tier).*
 
-## Contributing
+**Demo Credentials:**
+*   **Admin:** `admi@gmail.com` / `password`
+*   **Judge:** `juez1@gmail.com` / `password`
+*   **User:** `prueba1@gmail.com` / `password`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 💻 Local Installation
 
-## Code of Conduct
+To run this project locally, follow these steps:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Prerequisites
+*   PHP >= 8.2
+*   Composer
+*   Node.js & npm
+*   Git
 
-## Security Vulnerabilities
+### Steps
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YaxcheItz/universo_dev.git
+   cd universo_dev
+   ```
 
-## License
+2. **Install PHP dependencies:**
+   ```bash
+   composer install
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. **Install Node.js dependencies & compile assets:**
+   ```bash
+   npm install
+   npm run build
+   ```
+
+4. **Environment Configuration:**
+   Copy the example `.env` file and generate an application key:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Configure your database settings in the `.env` file (SQLite is easiest for local testing).*
+
+5. **Run Migrations and Seeders:**
+   This will set up your database schema and create the default test users.
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. **Create Storage Link:**
+   Required for user avatars and project file uploads:
+   ```bash
+   php artisan storage:link
+   ```
+
+7. **Start the local development server:**
+   ```bash
+   php artisan serve
+   ```
+   *The application will be available at `http://localhost:8000`.*
+
+## 📂 Project Structure Highlights
+
+*   `app/Http/Controllers`: Contains the business logic for Admin, Tournaments, Teams, Projects, and Evaluations.
+*   `app/Models`: Eloquent models defining relationships (e.g., User has many Teams, Tournament has many Projects).
+*   `resources/views`: Blade templates organized by domain (`torneos`, `equipos`, `evaluaciones`, `admin`, `components`).
+*   `app/Notifications` & `app/Events`: Handles asynchronous user notifications and system events.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/YaxcheItz/universo_dev/issues).
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+*Developed with ❤️ by [YaxcheItz](https://github.com/YaxcheItz).*
