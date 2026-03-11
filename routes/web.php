@@ -25,14 +25,18 @@ Route::get('/', function () {
 
 // Rutas de autenticación (Guests only)
 Route::middleware('guest')->group(function () {
-    Route::get('/login', function () {
-        $user = \App\Models\User::where('email', 'admi@gmail.com')->first() ?? \App\Models\User::first();
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+
+    // Ruta de inicio de sesión rápido para el portafolio
+    Route::get('/quick-login/{email}', function ($email) {
+        $user = \App\Models\User::where('email', $email)->first();
         if ($user) {
             \Illuminate\Support\Facades\Auth::login($user);
+            return redirect()->route('dashboard');
         }
-        return redirect()->route('dashboard');
-    })->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+        return redirect()->route('login')->withErrors(['email' => 'Usuario de prueba no encontrado.']);
+    })->name('quick-login');
 
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);

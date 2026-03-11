@@ -236,6 +236,26 @@
 
                 <!-- Login Form -->
                 <div class="card">
+                    <!-- Quick Login Buttons for Portfolio -->
+                    <div class="mb-6 space-y-3 pb-6 border-b border-universo-border">
+                        <p class="text-sm text-universo-text-muted text-center mb-4">🚀 Acceso Rápido (Portafolio)</p>
+                        
+                        <a href="{{ route('quick-login', 'admi@gmail.com') }}" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 rounded-lg border border-purple-600/30 transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m19 8 2 2-4 4"/></svg>
+                            Entrar como Administrador
+                        </a>
+                        
+                        <a href="{{ route('quick-login', 'juez1@gmail.com') }}" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg border border-blue-600/30 transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            Entrar como Juez
+                        </a>
+
+                        <a href="{{ route('quick-login', 'prueba1@gmail.com') }}" class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg border border-emerald-600/30 transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            Entrar como Participante
+                        </a>
+                    </div>
+
                     <form method="POST" action="{{ route('login') }}" class="space-y-5">
                         @csrf
 
