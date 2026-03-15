@@ -19,7 +19,7 @@
 
     <!-- Barra de búsqueda -->
     <div class="mb-8">
-        <form action="{{ route('proyectos.index') }}" method="GET" class="flex gap-4">
+        <form action="{{ route('proyectos.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
             <div class="relative flex-1">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-5 h-5 text-universo-text-muted"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
@@ -32,14 +32,16 @@
                     value="{{ request('search') }}"
                 >
             </div>
-            <button type="submit" class="btn-primary">
-                Buscar
-            </button>
-            @if(request('search'))
-                <a href="{{ route('proyectos.index') }}" class="btn-secondary">
-                    Limpiar
-                </a>
-            @endif
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary flex-1 md:flex-none">
+                    Buscar
+                </button>
+                @if(request('search'))
+                    <a href="{{ route('proyectos.index') }}" class="btn-secondary flex-1 md:flex-none text-center">
+                        Limpiar
+                    </a>
+                @endif
+            </div>
         </form>
         
         @if(request('search'))
