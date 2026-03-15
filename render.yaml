@@ -1,7 +1,7 @@
 databases:
-  - name: universo-dev-db
-    databaseName: universo_dev
-    user: universo_dev_user
+  - name: trabajos
+    databaseName: trabajos
+    user: trabajos_user
     plan: free
 
 services:
@@ -32,21 +32,21 @@ services:
         value: pgsql
       - key: DB_HOST
         fromDatabase:
-          name: universo-dev-db
+          name: trabajos
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: universo-dev-db
+          name: trabajos
           property: port
       - key: DB_DATABASE
         fromDatabase:
-          name: universo-dev-db
+          name: trabajos
           property: database
       - key: DB_USERNAME
         fromDatabase:
-          name: universo-dev-db
+          name: trabajos
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: universo-dev-db
+          name: trabajos
           property: password
