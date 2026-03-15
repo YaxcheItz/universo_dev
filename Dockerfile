@@ -42,7 +42,9 @@ RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 EXPOSE ${PORT:-8080}
 
 # Start script
-CMD touch /var/www/database/database.sqlite && \
+CMD mkdir -p /var/www/database && \
+    touch /var/www/database/database.sqlite && \
+    chmod 666 /var/www/database/database.sqlite && \
     php artisan config:clear && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
