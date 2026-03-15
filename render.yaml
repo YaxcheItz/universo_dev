@@ -1,9 +1,3 @@
-databases:
-  - name: trabajos
-    databaseName: trabajos
-    user: trabajos_user
-    plan: free
-
 services:
   - type: web
     name: universo-dev
@@ -29,24 +23,6 @@ services:
       - key: QUEUE_CONNECTION
         value: sync
       - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
-        fromDatabase:
-          name: trabajos
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: trabajos
-          property: port
+        value: sqlite
       - key: DB_DATABASE
-        fromDatabase:
-          name: trabajos
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: trabajos
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: trabajos
-          property: password
+        value: /var/www/database/database.sqlite
